@@ -69,7 +69,7 @@ class ProvisioningWizard < BaseWizard
     if @base_url != nil and !@base_url.empty?
       @base_url
     elsif Facter.fqdn != nil
-      "https://#{Facter.fqdn}"
+      @base_url = "https://#{Facter.fqdn}"
     end
   end
 
@@ -167,7 +167,7 @@ class ProvisioningWizard < BaseWizard
         elsif gw < addr
           @to = (gw-1).to_addr
         elsif (gw-addr) >= (addr.broadcast-gw) && (gw-addr) >= (addr-addr.network)
-          @tp = (gw-1).to_addr
+          @to = (gw-1).to_addr
         elsif (addr.broadcast-gw) >= (addr-addr.network)
           @to = addr.broadcast(-1).to_addr
         else
