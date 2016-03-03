@@ -121,8 +121,20 @@ class ProvisioningWizard < BaseWizard
   def gateway
     if @gateway != nil && !@gateway.empty?
       @gateway
-    elsif own_gateway != nil
-      @gateway = own_gateway
+    elsif own_gateway != nil && ip != nil && netmask != nil
+      begin
+        mask = get_pfx(netmask)
+        addr = get_cidr(ip, mask)
+        gw = get_cidr(own_gateway, mask)
+        if gw.is_in?(addr.network)
+          @gateway = own_gateway
+        elsif addr == addr.network(1)
+          @gateway = addr.broadcast(-1).to_addr
+        else
+          @gateway = addr.network(1).to_addr
+        end
+      rescue
+      end
     end
   end
 
@@ -133,7 +145,7 @@ class ProvisioningWizard < BaseWizard
       begin
         mask = get_pfx(netmask)
         addr = get_cidr(ip, mask)
-        gw = get_cidr(own_gateway, mask)
+        gw = get_cidr(gateway, mask)
         if gw < addr && (addr-gw) >= (addr.broadcast-addr) && (addr-gw) >= (gw-addr.network)
           @from = (gw+1).to_addr
         elsif gw < addr && (addr.broadcast-addr) >= (gw-addr.network)
@@ -159,7 +171,7 @@ class ProvisioningWizard < BaseWizard
       begin
         mask = get_pfx(netmask)
         addr = get_cidr(ip, mask)
-        gw = get_cidr(own_gateway, mask)
+        gw = get_cidr(gateway, mask)
         if gw < addr && (addr-gw) >= (addr.broadcast-addr) && (addr-gw) >= (gw-addr.network)
           @to = (addr-1).to_addr
         elsif gw < addr && (addr.broadcast-addr) >= (gw-addr.network)
