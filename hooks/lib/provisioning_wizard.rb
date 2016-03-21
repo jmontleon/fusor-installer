@@ -357,8 +357,8 @@ class ProvisioningWizard < BaseWizard
   def validate_ntp_host
     if @ntp_host.nil? || @ntp_host.empty?
       'NTP sync host must be specified'
-    elsif !(valid_ip?(@ntp_host))
-      'NTP sync host - Invalid IP address'
+    elsif !(valid_hostname?(@ntp_host))  && !(valid_hostname?(@ntp_host))
+      'NTP sync host - Invalid Hostname or IP address'
     end
   end
 
@@ -448,9 +448,13 @@ class ProvisioningWizard < BaseWizard
   end
 
   def valid_ip?(ip)
-    (!!(ip =~ Resolv::IPv4::Regex)) ||
-    (!!(ip =~ Resolv::IPv6::Regex)) ||
-    (ip =~ /^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$/)
+    ip =~ /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/
+  end
+
+  def valid_hostname?(hostname)
+    (!!(hostname =~ Resolv::IPv4::Regex)) ||
+    (!!(hostname =~ Resolv::IPv6::Regex)) ||
+    (hostname =~ /^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$/)
   end
 
   # NOTE(jistr): currently we only have tzinfo for ruby193 scl and
