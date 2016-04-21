@@ -357,7 +357,7 @@ class ProvisioningWizard < BaseWizard
   def validate_ntp_host
     if @ntp_host.nil? || @ntp_host.empty?
       'NTP sync host must be specified'
-    elsif !(valid_hostname?(@ntp_host))  && !(valid_hostname?(@ntp_host))
+    elsif !(valid_ip?(@ntp_host)) && !(valid_hostname?(@ntp_host))
       'NTP sync host - Invalid Hostname or IP address'
     end
   end
