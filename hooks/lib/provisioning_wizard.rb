@@ -274,7 +274,7 @@ class ProvisioningWizard < BaseWizard
   end
 
   def validate_netmask
-    if netmask == nil
+    if netmask.nil? || netmask.empty?
       'You must specify a netmask'
     elsif IPAddr.new(@netmask).to_i.to_s(2).count("1").to_i > 29
       'You require a /29 (255.255.255.248) subnet at minimum'
@@ -294,8 +294,10 @@ class ProvisioningWizard < BaseWizard
   def validate_own_gateway
     if !(valid_ip?(@own_gateway))
       'Host Gateway - Invalid IP address'
-    elsif (IPAddr.new(from)..IPAddr.new(to))===IPAddr.new(own_gateway)
-      'DHCP range is Invalid - DHCP range includes the Host Gateway IP address'
+    elsif !from.nil? && !from.empty? && !to.nil? && !to.empty?
+      if (IPAddr.new(from)..IPAddr.new(to))===IPAddr.new(own_gateway)
+        'DHCP range is Invalid - DHCP range includes the Host Gateway IP address'
+      end
     end
   end
 
