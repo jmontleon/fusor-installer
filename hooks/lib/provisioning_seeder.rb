@@ -46,7 +46,6 @@ class ProvisioningSeeder < BaseSeeder
                                                                  { 'name' => 'Puppet',
                                                                    'content_type' => 'puppet' })
     upload_puppet_modules(puppet_repo)
-    @foreman.api_resource(:smart_proxies).action(:import_puppetclasses).call({ 'id' => default_proxy['id'] })
 
     default_content_view = @foreman.content_views.katello_search_or_ensure(
                                                                  { 'organization_id' => default_organization['id'],
@@ -117,6 +116,8 @@ class ProvisioningSeeder < BaseSeeder
     setup_idle_timeout
     setup_default_root_pass
     setup_ignore_puppet_facts_for_provisioning
+
+    @foreman.environments.import_puppetclasses({ 'id' => default_proxy['id'], 'environment_id' => default_puppet_environment['id'] })
 
     assign_organization(default_organization,
                         { 'domain' => default_domain, 'subnet' => default_subnet,
