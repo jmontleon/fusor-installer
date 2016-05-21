@@ -65,28 +65,9 @@ if app_value(:provisioning_wizard) != 'none' && [0,2].include?(kafo.exit_code)
   `service puppet start`
   logger.debug 'Puppet agent run finished'
 
-  logger.debug 'Installing puppet modules'
-  `/usr/share/foreman-installer/hooks/lib/install_modules.sh`
-  if DEVEL_ENV
-    system "sudo su #{USER} -c '/bin/bash --login -c \"rvm use #{RVM_RUBY} && cd #{DEPLOYMENT_DIR}/foreman && bundle exec rake puppet:import:puppet_classes[batch]\"'"
-  else
-    `foreman-rake puppet:import:puppet_classes[batch]`
-  end
-  # run import
-  logger.debug 'Puppet modules installed'
-
   # add other provisioning data
   pro_seeder = ProvisioningSeeder.new(kafo)
   pro_seeder.seed
-
-  if DEVEL_ENV
-    kill_server if rails_running?
-    system "sudo su #{USER} -c '/bin/bash --login -c \"rvm use #{RVM_RUBY} && cd #{DEPLOYMENT_DIR}/foreman && bundle exec rake db:migrate\"'"
-    system "sudo su #{USER} -c '/bin/bash --login -c \"rvm use #{RVM_RUBY} && cd #{DEPLOYMENT_DIR}/foreman && bundle exec rake db:seed\"'"
-  else
-    `foreman-rake db:migrate`
-    `foreman-rake db:seed`
-  end
 
   say HighLine.color("Setup provisioning step complete.", :good)
 else
