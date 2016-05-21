@@ -88,7 +88,7 @@ class ProvisioningSeeder < BaseSeeder
     default_config_templates = []
 
     rhev_self_hosted_ptable = @foreman.ptables.show_or_ensure(
-                                            {'id' => 'ptable_rhev_self_hosted'},
+                                            {'id' => 'rhev_self_hosted'},
                                             {
                                               'name' => 'rhev_self_hosted',
                                               'os_family' => 'Redhat',
