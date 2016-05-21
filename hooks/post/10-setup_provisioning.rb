@@ -52,7 +52,24 @@ if app_value(:provisioning_wizard) != 'none' && [0,2].include?(kafo.exit_code)
     system("echo ':restrict_registered_smart_proxies: false' >> #{DEPLOYMENT_DIR}/foreman/config/settings.yaml")
 
     run_rails
-    say "Rails is running in PID: #{rails_pid}"
+    say "Waiting up to 5 minutes for 200 response code"
+    i = 0
+    uri = URI.parse("https://#{Facter.value('fqdn')}/users/login")
+    http = Net::HTTP.new(uri.host, 443)
+    http.use_ssl = true
+    http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+    request = Net::HTTP::Get.new(uri.request_uri)
+    while i < 30
+      sleep 10
+      if http.request(request).code == "200"
+        say "Rails is up!"
+        break
+      end
+      i+= 1
+      if i == 30
+        say "Rails may have failed to start..."
+      end
+    end
   end
 
   # we must enforce at least one puppet run
