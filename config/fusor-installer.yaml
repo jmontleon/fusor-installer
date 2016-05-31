@@ -1,176 +1,24 @@
----
-  :name: Foreman
+--- 
+  :name: Fusor
   :description: ""
-  :log_dir: /var/log/foreman-installer
-  :log_name: foreman-installer.log
-  :log_level: :debug
+  :enabled: true
+  :log_dir: /var/log/fusor-installer
+  :log_name: fusor-installer.log
+  :log_level: info
   :no_prefix: false
-  :mapping:
-    :"foreman::plugin::fusor":
-      :dir_name: foreman
-      :manifest_name: plugin/fusor
-    :"foreman::cli":
-      :dir_name: foreman
-      :manifest_name: cli
-      :params_name: cli/params
-    :"foreman::plugin::bootdisk":
-      :dir_name: foreman
-      :manifest_name: plugin/bootdisk
-    :"foreman::plugin::cockpit":
-      :dir_name: foreman
-      :manifest_name: plugin/cockpit
-    :"foreman::plugin::puppetdb":
-      :dir_name: foreman
-      :params_name: plugin/puppetdb/params
-      :manifest_name: plugin/puppetdb
-    :"foreman::plugin::hooks":
-      :dir_name: foreman
-      :manifest_name: plugin/hooks
-    :"foreman::plugin::dhcp_browser":
-      :dir_name: foreman
-      :manifest_name: plugin/dhcp_browser
-    :"foreman::plugin::digitalocean":
-      :dir_name: foreman
-      :manifest_name: plugin/digitalocean
-    :"foreman::plugin::discovery":
-      :dir_name: foreman
-      :manifest_name: plugin/discovery
-      :params_name: plugin/discovery/params
-    :"foreman::plugin::docker":
-      :dir_name: foreman
-      :manifest_name: plugin/docker
-    :"foreman::plugin::memcache":
-      :dir_name: foreman
-      :manifest_name: plugin/memcache
-      :params_name: plugin/memcache/params
-    :"foreman::plugin::openscap":
-      :dir_name: foreman
-      :params_name: plugin/openscap/params
-      :manifest_name: plugin/openscap
-    :"foreman::plugin::ovirt_provision":
-      :dir_name: foreman
-      :params_name: plugin/ovirt_provision/params
-      :manifest_name: plugin/ovirt_provision
-    :"foreman::plugin::chef":
-      :dir_name: foreman
-      :manifest_name: plugin/chef
-    :"foreman::plugin::tasks":
-      :dir_name: foreman
-      :params_name: plugin/tasks/params
-      :manifest_name: plugin/tasks
-    :"foreman::plugin::templates":
-      :dir_name: foreman
-      :manifest_name: plugin/templates
-    :"foreman::plugin::remote_execution":
-      :dir_name: foreman
-      :manifest_name: plugin/remote_execution
-      :params_name: plugin/remote_execution/params
-    :"foreman::plugin::salt":
-      :dir_name: foreman
-      :manifest_name: plugin/salt
-    :"foreman::plugin::setup":
-      :dir_name: foreman
-      :manifest_name: plugin/setup
-    :"foreman::plugin::default_hostgroup":
-      :dir_name: foreman
-      :manifest_name: plugin/default_hostgroup
-    :"foreman::compute::rackspace":
-      :dir_name: foreman
-      :manifest_name: compute/rackspace
-    :"foreman::compute::openstack":
-      :dir_name: foreman
-      :manifest_name: compute/openstack
-    :"foreman::compute::vmware":
-      :dir_name: foreman
-      :manifest_name: compute/vmware
-    :"foreman::compute::libvirt":
-      :dir_name: foreman
-      :manifest_name: compute/libvirt
-    :"foreman::compute::ec2":
-      :dir_name: foreman
-      :manifest_name: compute/ec2
-    :"foreman::compute::gce":
-      :dir_name: foreman
-      :manifest_name: compute/gce
-    :"foreman::compute::ovirt":
-      :dir_name: foreman
-      :manifest_name: compute/ovirt
-    :"foreman_proxy::plugin::abrt":
-      :manifest_name: plugin/abrt
-      :params_name: plugin/abrt/params
-      :dir_name: foreman_proxy
-    :"foreman_proxy::plugin::chef":
-      :manifest_name: plugin/chef
-      :params_name: plugin/chef/params
-      :dir_name: foreman_proxy
-    :"foreman_proxy::plugin::dns::powerdns":
-      :manifest_name: plugin/dns/powerdns
-      :params_name: plugin/dns/powerdns/params
-      :dir_name: foreman_proxy
-    :"foreman_proxy::plugin::dynflow":
-      :manifest_name: plugin/dynflow
-      :params_name: plugin/dynflow/params
-      :dir_name: foreman_proxy
-    :"foreman_proxy::plugin::openscap":
-      :manifest_name: plugin/openscap
-      :params_name: plugin/openscap/params
-      :dir_name: foreman_proxy
-    :"foreman_proxy::plugin::pulp":
-      :manifest_name: plugin/pulp
-      :params_name: plugin/pulp/params
-      :dir_name: foreman_proxy
-    :"foreman_proxy::plugin::remote_execution::ssh":
-      :manifest_name: plugin/remote_execution/ssh
-      :params_name: plugin/remote_execution/ssh/params
-      :dir_name: foreman_proxy
-    :"foreman_proxy::plugin::salt":
-      :manifest_name: plugin/salt
-      :params_name: plugin/salt/params
-      :dir_name: foreman_proxy
-    :"katello::plugin::gutterball":
-      :dir_name: katello
-      :manifest_name: plugin/gutterball
-  :answer_file: /etc/foreman-installer/fusor-installer.answers.yaml
-  :installer_dir: /usr/share/foreman-installer
-  :module_dirs:
+  :mapping: {}
+  :answer_file: /etc/fusor-installer/fusor-installer.answers.yaml
+  :installer_dir: /usr/share/fusor-installer
+  :module_dirs: 
+    - /usr/share/fusor-installer/modules
     - /usr/share/foreman-installer/modules
-    - /usr/share/katello-installer-base/modules
   :default_values_dir: /tmp
   :colors: true
   :color_of_background: :dark
-  :hook_dirs:
-    - /usr/share/katello-installer-base/hooks
+  :hook_dirs: []
   :custom: {}
   :low_priority_modules: []
   :verbose_log_level: info
+  :parser_cache_path: "./config/parser_cache.json"
+  :password: H69G9HAWaY0xeIefmGfRHTuur8IVYVAfesZonHwZFSQ
   :provisioning_wizard: interactive
-  :order:
-    - certs
-    - foreman
-    - katello
-    - foreman_proxy
-    - "foreman_proxy::plugin::pulp"
-    - capsule
-  :password: "_oVtAlUHZ1zcnEsv9UEMJMfbf-3oMpa6PTQc7Aneztg"
-  :reset_foreman_db: false
-  :detailed_exitcodes: false
-  :dont_save_answers: false
-  :ignore_undocumented: false
-  :interactive:
-  :noop: false
-  :profile: false
-  :skip_checks_i_know_better: false
-  :verbose:
-  :scenario:
-  :list_scenarios:
-  :force:
-  :compare_scenarios:
-  :migrations_only:
-  :reset: false
-  :clear_pulp_content: false
-  :clear_puppet_environments: false
-  :certs_update_server: false
-  :certs_update_server_ca: false
-  :certs_update_all: false
-  :certs_skip_check: false
-  :upgrade: false

@@ -24,7 +24,7 @@
 # $configure_firewall::   Should we modify firewall?
 #                         type:boolean
 #
-class foreman::plugin::fusor_network(
+class fusor_network(
     $interface,
     $ip,
     $netmask,

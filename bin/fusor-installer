@@ -1,98 +1,64 @@
-#!/usr/bin/env ruby
-require 'rubygems'
-require 'highline/import'
-require 'yaml'
-require 'kafo'
+#!/bin/bash
 
-# base the answer file name on the file calling the
-# script.  This allows other programs to use their own
-# files if named based on their executable
-config_filename = File.basename($0) + ".yaml"
+if [ "$(id -u)" != "0" ]; then
+   echo "This script must be run as root"
+   exit 1
+fi
 
-# where to find answer file
-if File.exist?('config/' + config_filename)
-  CONFIG_FILE = 'config/' + config_filename   
+fusor-setup $@
+
+if [ $? != 0 ]; then
+  echo "fusor-setup did not run properly."
+  echo "Please correct the problem and try again."
+  exit 2
+elif [[ $@ == *"--help"* ]]; then
+  exit 0
+fi
+
+#kafo nukes the file permissions whatever we make them.
+if [[ $@ != *"--devel_env"* ]]; then
+  chmod 660 /etc/fusor-installer/fusor-installer.answers.yaml
+  chown root:foreman /etc/fusor-installer/fusor-installer.answers.yaml
+fi
+
+echo "Finished running fusor-setup."
+echo "Now running foreman-installer."
+
+foreman-installer --scenario fusor
+
+if [ $? != 0 ]; then
+  echo "foreman-installer did not run properly."
+  echo "Please correct the problem and try again."
+  exit 3
+fi
+
+echo "Finished running foreman-installer."
+echo "Now running rake fusor:setup."
+
+if [[ $@ == *"--devel_env"* ]]; then
+  while [[ $# > 0 ]]; do
+    i="$1"
+    case $i in
+      --deployment_dir=*)
+      deployment_dir="${i#*=}"
+      shift
+      ;;
+      --deployment_dir)
+      deployment_dir="$2"
+      shift
+      ;;
+      *)
+
+      ;;
+    esac
+    shift
+  done
+
+  if [[ -z "$deployment_dir" ]]; then
+    deployment_dir=/home/vagrant
+  fi
+
+  su - vagrant -c /bin/bash --login -c "cd ${deployment_dir}/foreman && rvm use 2.2.4 && rake fusor:setup"
 else
-  CONFIG_FILE = '/etc/foreman-installer/' + config_filename
-end
-
-# helpers
-def module_enabled?(name)
-  mod = @result.module(name)
-  return false if mod.nil?
-  mod.enabled?
-end
-
-def get_param(mod, name)
-  param = @result.param(mod, name)
-  param.nil? ? nil : param.value
-end
-
-# functions specific to foreman installer
-Kafo::KafoConfigure.app_option '--reset-foreman-db', :flag,
-                               "Drop foreman database first? You will lose all data! Unfortunately we\n" +
-                               "can't detect a failure at the moment so you should verify the success\n" +
-                               'manually. e.g. dropping can fail when DB is currently in use.',
-    :default => false
-
-Kafo::KafoConfigure.hooking.register_pre(:reset_db) do
-  if kafo.config.app[:reset_foreman_db] && !kafo.config.app[:noop]
-    `which foreman-rake > /dev/null 2>&1`
-    if $?.success?
-      Kafo::KafoConfigure.logger.info 'Dropping database!'
-      output = `foreman-rake db:drop 2>&1`
-      Kafo::KafoConfigure.logger.debug output.to_s
-      unless $?.success?
-        Kafo::KafoConfigure.logger.warn "Unable to drop DB, ignoring since it's not fatal, output was: '#{output}''"
-      end
-    else
-      Kafo::KafoConfigure.logger.warn 'Foreman not installed yet, can not drop database!'
-    end
-  end
-end
-
-# if --reset, clear puppet environments, else we hit errors when populating
-# fusor data
-Kafo::KafoConfigure.hooking.register_pre_validations(:fusor_reset) do
-  if kafo.config.app[:reset] && !kafo.config.app[:noop]
-    kafo.config.app[:clear_puppet_environments] = true
-  end
-end
-
-# Run the install
-@result = Kafo::KafoConfigure.run
-exit 0 if @result.nil? # --help invocation
-
-# Puppet status codes say 0 for unchanged, 2 for changed succesfully
-if [0,2].include? @result.exit_code
-  say "  <%= color('Success!', :good) %>"
-
-  # Foreman UI?
-  if module_enabled? 'foreman'
-    say "  * <%= color('Foreman', :info) %> is running at <%= color('#{get_param('foreman','foreman_url')}', :info) %>"
-    say "      Initial credentials are <%= color('#{get_param('foreman', 'admin_username') || 'admin'}', :info) %> / <%= color('#{get_param('foreman', 'admin_password') || 'changeme'}', :info) %>" if get_param('foreman','authentication') == true
-  end
-
-  # Proxy?
-  if module_enabled? 'foreman_proxy'
-    say "  * <%= color('Foreman Proxy', :info) %> is running at <%= color('#{get_param('foreman_proxy','registered_proxy_url')}', :info) %>"
-  end
-
-  # Puppetmaster?
-  if ( module_enabled?('puppet') && ( get_param('puppet','server') != false ) )
-    say "  * <%= color('Puppetmaster', :info) %> is running at <%= color('port #{get_param('puppet','server_port')}', :info) %>"
-  end
-  exit_code = 0
-elsif @result.exit_code == 100
-  # user cancelled installation
-  exit_code = @result.exit_code
-else
-  say "  <%= color('Something went wrong!', :bad) %> Check the log for ERROR-level output"
-  exit_code = @result.exit_code
-end
-
-# This is always useful, success or fail
-log = @result.config.app[:log_dir] + '/' + @result.config.app[:log_name]
-say "  The full log is at <%= color('#{log}', :info) %>"
-
-exit exit_code
+  foreman-rake fusor:setup
+fi

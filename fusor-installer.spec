@@ -9,7 +9,7 @@
 
 Name:       fusor-installer
 Epoch:      1
-Version:    1.0.0
+Version:    1.0.1
 Release:    0%{?dotalphatag}%{?dist}
 Summary:    Foreman-installer plugin that allows you to install Fusor
 Group:      Applications/System
@@ -36,43 +36,32 @@ the Fusor Foreman plugin
 %build
 #replace shebangs for SCL
 %if %{?scl:1}%{!?scl:0}
-  sed -ri '1sX(/usr/bin/ruby|/usr/bin/env ruby)X%{scl_ruby}X' bin/fusor-installer
+  sed -ri '1sX(/usr/bin/ruby|/usr/bin/env ruby)X%{scl_ruby}X' bin/fusor-setup
 %endif
 
 %install
-install -d -m0755 %{buildroot}%{_datadir}/foreman-installer
-cp -R hooks modules %{buildroot}%{_datadir}/foreman-installer
+install -d -m0755 %{buildroot}%{_datadir}/fusor-installer
+cp -R hooks modules %{buildroot}%{_datadir}/fusor-installer
 install -d -m0755 %{buildroot}%{_sbindir}
 cp bin/fusor-installer %{buildroot}%{_sbindir}/fusor-installer
-install -d -m0755 %{buildroot}%{_bindir}
-cp bin/fusor-register-host %{buildroot}%{_bindir}/fusor-register-host
-install -d -m0755 %{buildroot}%{_sysconfdir}/foreman-installer/
-cp config/fusor-installer.yaml %{buildroot}%{_sysconfdir}/foreman-installer/fusor-installer.yaml
-cp config/fusor-installer.answers.yaml %{buildroot}%{_sysconfdir}/foreman-installer/fusor-installer.answers.yaml
-
+cp bin/fusor-setup %{buildroot}%{_sbindir}/fusor-setup
+install -d -m0755 %{buildroot}%{_sysconfdir}/fusor-installer/
+cp config/fusor.yaml %{buildroot}%{_sysconfdir}/fusor-installer/fusor.yaml
+cp config/fusor-installer.yaml %{buildroot}%{_sysconfdir}/fusor-installer/fusor-installer.yaml
+cp config/fusor-installer.answers.yaml %{buildroot}%{_sysconfdir}/fusor-installer/fusor-installer.answers.yaml
 
 %files
 %defattr(-,root,root,-)
 %doc LICENSE
-%{_datadir}/foreman-installer/hooks/boot/05-remove_hostname_check.rb
-%{_datadir}/foreman-installer/hooks/boot/10-add_options.rb
-%{_datadir}/foreman-installer/hooks/lib/base_seeder.rb
-%{_datadir}/foreman-installer/hooks/lib/foreman.rb
-%attr(755, root, root) %{_datadir}/foreman-installer/hooks/lib/install_modules.sh
-%{_datadir}/foreman-installer/hooks/lib/base_wizard.rb
-%{_datadir}/foreman-installer/hooks/lib/provisioning_seeder.rb
-%{_datadir}/foreman-installer/hooks/lib/provisioning_wizard.rb
-%{_datadir}/foreman-installer/hooks/post/10-setup_provisioning.rb
-%{_datadir}/foreman-installer/hooks/pre_validations/10-gather_and_set_fusor_values.rb
-%{_datadir}/foreman-installer/hooks/pre_values/10-register_fusor_modules.rb
-%{_datadir}/foreman-installer/modules/network
-%{_datadir}/foreman-installer/modules/ntp
-%{_datadir}/foreman-installer/modules/foreman/manifests/plugin/fusor.pp
-%{_datadir}/foreman-installer/modules/foreman/manifests/plugin/fusor_network.pp
-%config %attr(600, root, root) %{_sysconfdir}/foreman-installer/fusor-installer.yaml
-%config(noreplace) %attr(600, root, root) %{_sysconfdir}/foreman-installer/fusor-installer.answers.yaml
+%{_datadir}/fusor-installer/hooks/lib/base_wizard.rb
+%{_datadir}/fusor-installer/hooks/lib/provisioning_wizard.rb
+%{_datadir}/fusor-installer/hooks/pre_validations/10-gather_and_set_fusor_values.rb
+%{_datadir}/fusor-installer/modules/
+%config %attr(600, root, root) %{_sysconfdir}/fusor-installer/fusor.yaml
+%config %attr(600, root, root) %{_sysconfdir}/fusor-installer/fusor-installer.yaml
+%config(noreplace) %attr(600, root, root) %{_sysconfdir}/fusor-installer/fusor-installer.answers.yaml
 %{_sbindir}/fusor-installer
-%{_bindir}/fusor-register-host
+%{_sbindir}/fusor-setup
 
 %changelog
 * Thu Apr 09 2015 John Matthews <jwmatthews@gmail.com> 0.0.14-1

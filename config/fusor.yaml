@@ -1,18 +1,12 @@
 --- 
-  :name: "Fusor devel"
+  :name: "Fusor"
   :description: ""
-  :log_dir: /var/log/fusor-devel-installer
-  :log_name: fusor-devel-installer.log
-  :devel_env: true
-  :log_level: DEBUG
-  :no_prefix: true
+  :enabled: true
+  :log_dir: "/var/log/foreman-installer"
+  :log_name: "foreman-installer.log"
+  :log_level: "INFO"
+  :no_prefix: false
   :mapping:
-    :"katello_devel::plugin::gutterball":
-      :dir_name: katello_devel
-      :manifest_name: plugin/gutterball
-    :"katello_devel::plugin::foreman_gutterball":
-      :dir_name: katello_devel
-      :manifest_name: plugin/foreman_gutterball
     :"foreman::plugin::fusor":
       :dir_name: foreman
       :manifest_name: plugin/fusor
@@ -134,11 +128,8 @@
       :manifest_name: plugin/salt
       :params_name: plugin/salt/params
       :dir_name: foreman_proxy
-    :"katello::plugin::gutterball":
-      :dir_name: katello
-      :manifest_name: plugin/gutterball
-  :answer_file: ./config/fusor-devel-installer.answers.yaml
-  :installer_dir: "."
+  :answer_file: /etc/foreman-installer/scenarios.d/fusor.answers.yaml
+  :installer_dir: /usr/share/foreman-installer
   :module_dirs:
     - /usr/share/foreman-installer/modules
     - /usr/share/katello-installer-base/modules
@@ -150,12 +141,13 @@
   :custom: {}
   :low_priority_modules: []
   :verbose_log_level: info
+  :parser_cache_path: "./config/parser_cache.json"
   :provisioning_wizard: interactive
   :order:
     - certs
-    - katello_devel
+    - foreman
+    - katello
     - foreman_proxy
     - "foreman_proxy::plugin::pulp"
     - capsule
   :password: "_oVtAlUHZ1zcnEsv9UEMJMfbf-3oMpa6PTQc7Aneztg"
-  :interactive:

@@ -1,0 +1,103 @@
+#!/usr/bin/env ruby
+require 'rubygems'
+require 'highline/import'
+require 'yaml'
+require 'kafo'
+
+CONFIG_FILE = '/etc/fusor-installer/fusor-installer.yaml'
+
+# helpers
+def module_enabled?(name)
+  mod = @result.module(name)
+  return false if mod.nil?
+  mod.enabled?
+end
+
+def get_param(mod, name)
+  param = @result.param(mod, name)
+  param.nil? ? nil : param.value
+end
+
+Kafo::KafoConfigure.hooking.register_boot(:add_admin_passwd_option) do
+  app_option '--foreman-admin-password',
+    'PASSWD', 'Configure the foreman admin password.', :default => nil
+end
+
+Kafo::KafoConfigure.hooking.register_boot(:add_devel_option) do
+  app_option '--devel_env',
+    :flag, 'Prepare a Foreman Answer File for development instead of production.', :default => false
+end
+
+Kafo::KafoConfigure.hooking.register_boot(:add_deployment_dir_option) do
+  app_option '--deployment_dir',
+    'PATH', "Alternate deployment directory for development install.\nHas no effect for a production install.', :default => '/home/vagrant"
+end
+
+# functions specific to foreman installer
+Kafo::KafoConfigure.app_option '--reset-foreman-db', :flag,
+                               "Drop foreman database first? You will lose all data! Unfortunately we\n" +
+                               "can't detect a failure at the moment so you should verify the success\n" +
+                               'manually. e.g. dropping can fail when DB is currently in use.',
+    :default => false
+
+Kafo::KafoConfigure.hooking.register_pre(:reset_db) do
+  if kafo.config.app[:reset_foreman_db] && !kafo.config.app[:noop]
+    `which foreman-rake > /dev/null 2>&1`
+    if $?.success?
+      Kafo::KafoConfigure.logger.info 'Dropping database!'
+      output = `foreman-rake db:drop 2>&1`
+      Kafo::KafoConfigure.logger.debug output.to_s
+      unless $?.success?
+        Kafo::KafoConfigure.logger.warn "Unable to drop DB, ignoring since it's not fatal, output was: '#{output}''"
+      end
+    else
+      Kafo::KafoConfigure.logger.warn 'Foreman not installed yet, can not drop database!'
+    end
+  end
+end
+
+# if --reset, clear puppet environments, else we hit errors when populating
+# fusor data
+Kafo::KafoConfigure.hooking.register_pre_validations(:fusor_reset) do
+  if kafo.config.app[:reset] && !kafo.config.app[:noop]
+    kafo.config.app[:clear_puppet_environments] = true
+  end
+end
+
+# Run the install
+@result = Kafo::KafoConfigure.run
+exit 0 if @result.nil? # --help invocation
+
+# Puppet status codes say 0 for unchanged, 2 for changed succesfully
+if [0,2].include? @result.exit_code
+  say "  <%= color('Success!', :good) %>"
+
+  # Foreman UI?
+  if module_enabled? 'foreman'
+    say "  * <%= color('Foreman', :info) %> is running at <%= color('#{get_param('foreman','foreman_url')}', :info) %>"
+    say "      Initial credentials are <%= color('#{get_param('foreman', 'admin_username') || 'admin'}', :info) %> / <%= color('#{get_param('foreman', 'admin_password') || 'changeme'}', :info) %>" if get_param('foreman','authentication') == true
+  end
+
+  # Proxy?
+  if module_enabled? 'foreman_proxy'
+    say "  * <%= color('Foreman Proxy', :info) %> is running at <%= color('#{get_param('foreman_proxy','registered_proxy_url')}', :info) %>"
+  end
+
+  # Puppetmaster?
+  if ( module_enabled?('puppet') && ( get_param('puppet','server') != false ) )
+    say "  * <%= color('Puppetmaster', :info) %> is running at <%= color('port #{get_param('puppet','server_port')}', :info) %>"
+  end
+  exit_code = 0
+elsif @result.exit_code == 100
+  # user cancelled installation
+  exit_code = @result.exit_code
+else
+  say "  <%= color('Something went wrong!', :bad) %> Check the log for ERROR-level output"
+  exit_code = @result.exit_code
+end
+
+# This is always useful, success or fail
+log = @result.config.app[:log_dir] + '/' + @result.config.app[:log_name]
+say "  The full log is at <%= color('#{log}', :info) %>"
+
+exit exit_code

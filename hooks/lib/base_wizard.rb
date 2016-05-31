@@ -69,7 +69,7 @@ class BaseWizard
   end
 
   def kafo_param(attr)
-    @kafo.param('foreman_plugin_fusor', attr.to_s)
+    @kafo.param('fusor', attr.to_s)
   end
 
   def print_configuration
