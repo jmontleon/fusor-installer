@@ -15,7 +15,6 @@ class ProvisioningWizard < BaseWizard
         :gateway => 'DHCP gateway',
         :dns => 'DNS forwarder',
         :domain => 'Domain',
-        :base_url => 'Foreman URL',
         :ntp_host => 'NTP sync host',
         :timezone => 'Time zone',
         :bmc => 'BMC feature enabled',
@@ -26,7 +25,7 @@ class ProvisioningWizard < BaseWizard
   end
 
   def self.order
-    %w(interface fqdn ip netmask own_gateway network from to gateway dns domain base_url ntp_host timezone bmc bmc_default_provider configure_networking configure_firewall)
+    %w(interface fqdn ip netmask own_gateway network from to gateway dns domain ntp_host timezone bmc bmc_default_provider configure_networking configure_firewall)
   end
 
   def self.custom_labels
@@ -44,8 +43,10 @@ class ProvisioningWizard < BaseWizard
     self.help = "The installer can configure the networking and firewall rules on this machine with the configuration shown below. Default values are populated from this machine's existing networking configuration.\n\nIf you DO NOT want to configure networking, select the option 'Do not configure networking' from the list below."
     self.allow_cancellation = true
 
-    @bmc = kafo.param('foreman_proxy', 'bmc').value
-    @bmc_default_provider = kafo.param('foreman_proxy', 'bmc_default_provider').value
+    @bmc = false 
+    @bmc_default_provider = 'ipmitool'
+    @configure_networking = true
+    @configure_firewall = true
   end
 
   def start
@@ -63,14 +64,6 @@ class ProvisioningWizard < BaseWizard
 
   def get_timezone
     @timezone = ask('Enter an IANA time zone identifier (e.g. America/New_York, Pacific/Auckland, UTC)')
-  end
-
-  def base_url
-    if @base_url != nil and !@base_url.empty?
-      @base_url
-    elsif Facter.value('fqdn') != nil && Facter.value('fqdn') != 'localhost'
-      @base_url = "https://#{Facter.value('fqdn')}"
-    end
   end
 
   def domain
@@ -213,7 +206,6 @@ class ProvisioningWizard < BaseWizard
     @fqdn ||= Facter.value :fqdn
     config_fqdn
     if Facter.value('fqdn') != nil && Facter.value('fqdn') != 'localhost'
-      @base_url = "https://#{Facter.value('fqdn')}"
       @domain = Facter.value :domain
     end
     Facter.value :fqdn
@@ -350,10 +342,6 @@ class ProvisioningWizard < BaseWizard
     'Domain must be specified' if @domain.nil? || @domain.empty?
   end
 
-  def validate_base_url
-    'Foreman URL must be specified' if @base_url.nil? || @base_url.empty?
-  end
-
   def validate_ntp_host
     if @ntp_host.nil? || @ntp_host.empty?
       'NTP sync host must be specified'
@@ -391,7 +379,7 @@ class ProvisioningWizard < BaseWizard
         @interface = choose do |menu|
           menu.header = "\nSelect which NIC to use for provisioning"
           interfaces.keys.sort.each do |nic|
-            menu.choice nic
+            menu.choice("#{nic} (#{interfaces[nic][:macaddress]})") { nic }
           end
         end
     end
@@ -411,13 +399,14 @@ class ProvisioningWizard < BaseWizard
       ip = Facter.value "ipaddress_#{i}"
       network = Facter.value "network_#{i}"
       netmask = Facter.value "netmask_#{i}"
+      macaddress = Facter.value "macaddress_#{i}"
 
       cidr, from, to = nil, nil, nil
       if ip && network && netmask
         cidr = "#{network}/#{IPAddr.new(netmask).to_i.to_s(2).count('1')}"
       end
 
-      ifaces[fix_interface_name(i)] = {:ip => ip, :netmask => netmask, :network => network, :cidr => cidr, :from => from, :to => to, :gateway => gateway}
+      ifaces[fix_interface_name(i)] = {:ip => ip, :netmask => netmask, :network => network, :cidr => cidr, :from => from, :to => to, :gateway => gateway, :macaddress => macaddress}
       ifaces
     end
   end
