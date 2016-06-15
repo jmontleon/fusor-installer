@@ -28,6 +28,11 @@ Kafo::KafoConfigure.hooking.register_boot(:add_devel_option) do
     :flag, 'Prepare a Foreman Answer File for development instead of production.', :default => false
 end
 
+Kafo::KafoConfigure.hooking.register_boot(:add_noninteract_option) do
+  app_option '--provisioning_wizard',
+    'MODE', 'Use non-interactive to run in non-interactive mode', :default => 'interactive'
+end
+
 Kafo::KafoConfigure.hooking.register_boot(:add_deployment_dir_option) do
   app_option '--deployment_dir',
     'PATH', "Alternate deployment directory for development install.\nHas no effect for a production install.', :default => '/home/vagrant"

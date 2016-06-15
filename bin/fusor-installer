@@ -58,7 +58,23 @@ if [[ $@ == *"--devel_env"* ]]; then
     deployment_dir=/home/vagrant
   fi
 
-  su - vagrant -c /bin/bash --login -c "cd ${deployment_dir}/foreman && rvm use 2.2.4 && rake fusor:setup"
+  su - vagrant -c /bin/bash --login -c "cd ${deployment_dir}/foreman && rvm use 2.2.4 >/dev/null 2>&1 && rake fusor:setup >/dev/null 2>&1"
+  if [ $? != 0 ]; then
+    echo "rake fusor:setup did not run successfully"
+    echo "Please run it manually to determine the problem."
+    exit 4
+  else
+    echo "Finished running rake fusor:setup."
+    echo "Installation Complete!"
+  fi
 else
-  foreman-rake fusor:setup
+  foreman-rake fusor:setup >/dev/null 2>&1
+  if [ $? != 0 ]; then
+    echo "foreman-rake fusor:setup did not run successfully"
+    echo "Please run it manually to determine the problem."
+    exit 5
+  else
+    echo "Finished running foreman-rake fusor:setup."
+    echo "Installation Complete!"
+  fi
 fi
