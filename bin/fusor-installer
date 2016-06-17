@@ -36,6 +36,12 @@ echo "Finished running foreman-installer."
 echo "Now running rake fusor:setup."
 
 if [[ $@ == *"--devel_env"* ]]; then
+  echo "Setting up file permission for development environment."
+  setfacl -m u:vagrant:r /var/log/messages
+  setfacl -m u:vagrant:rx /var/log/foreman-proxy
+fi
+
+if [[ $@ == *"--devel_env"* ]]; then
   while [[ $# > 0 ]]; do
     i="$1"
     case $i in
@@ -78,3 +84,4 @@ else
     echo "Installation Complete!"
   fi
 fi
+
