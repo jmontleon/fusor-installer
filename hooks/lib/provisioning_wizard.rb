@@ -261,7 +261,7 @@ class ProvisioningWizard < BaseWizard
       say "<%= color('You may Configure your host for Updates via the RHSM', :good) %>"
       say "<%= color('Please visit the following for more information', :good) %>"
       say "<%= color('https://access.redhat.com/labs/registrationassistant/', :good) %>"
-      say "<%= color('You may also choose to so now with your credentials.. continue?', :good) %>"
+      say "<%= color('You may also choose to do so now with your credentials.. continue?', :good) %>"
       continue = ask('Enter YES to continue')
       unless ['YES', 'yes', 'Yes', 'Y'].include?(continue)
         @register_host = false
