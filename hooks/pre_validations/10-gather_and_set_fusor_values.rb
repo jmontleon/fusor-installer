@@ -183,7 +183,7 @@ if app_value(:provisioning_wizard) != 'none'
 
   File.open('/etc/foreman-installer/scenarios.d/fusor.answers.yaml', 'w') {|f| f.write c.to_yaml }
 
-  d=YAML::load(File.open('/etc/fusor-installer/fusor.yaml'))
+  d=YAML::load(File.open('/etc/fusor-installer/fusor-scenario.template'))
   if app_value(:devel_env)
     d[:log_level] = 'DEBUG'
     d[:hook_dirs] = []

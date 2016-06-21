@@ -46,7 +46,7 @@ install -d -m0755 %{buildroot}%{_sbindir}
 cp bin/fusor-installer %{buildroot}%{_sbindir}/fusor-installer
 cp bin/fusor-setup %{buildroot}%{_sbindir}/fusor-setup
 install -d -m0755 %{buildroot}%{_sysconfdir}/fusor-installer/
-cp config/fusor.yaml %{buildroot}%{_sysconfdir}/fusor-installer/fusor.yaml
+cp config/fusor-scenario.template %{buildroot}%{_sysconfdir}/fusor-installer/fusor-scenario.template
 cp config/fusor-installer.yaml %{buildroot}%{_sysconfdir}/fusor-installer/fusor-installer.yaml
 cp config/fusor-installer.answers.yaml %{buildroot}%{_sysconfdir}/fusor-installer/fusor-installer.answers.yaml
 
@@ -57,7 +57,7 @@ cp config/fusor-installer.answers.yaml %{buildroot}%{_sysconfdir}/fusor-installe
 %{_datadir}/fusor-installer/hooks/lib/provisioning_wizard.rb
 %{_datadir}/fusor-installer/hooks/pre_validations/10-gather_and_set_fusor_values.rb
 %{_datadir}/fusor-installer/modules/
-%config %attr(600, root, root) %{_sysconfdir}/fusor-installer/fusor.yaml
+%config %attr(600, root, root) %{_sysconfdir}/fusor-installer/fusor-scenario.template
 %config %attr(600, root, root) %{_sysconfdir}/fusor-installer/fusor-installer.yaml
 %config(noreplace) %attr(600, root, root) %{_sysconfdir}/fusor-installer/fusor-installer.answers.yaml
 %{_sbindir}/fusor-installer
