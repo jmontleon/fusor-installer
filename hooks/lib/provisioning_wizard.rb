@@ -20,12 +20,13 @@ class ProvisioningWizard < BaseWizard
         :bmc => 'BMC feature enabled',
         :bmc_default_provider => 'BMC default provider',
         :configure_networking => 'Configure networking on this machine',
-        :configure_firewall => 'Configure firewall on this machine'
+        :configure_firewall => 'Configure firewall on this machine',
+        :register_host => 'Register Host For Updates'
     }
   end
 
   def self.order
-    %w(interface fqdn ip netmask own_gateway network from to gateway dns domain ntp_host timezone bmc bmc_default_provider configure_networking configure_firewall)
+    %w(interface fqdn ip netmask own_gateway network from to gateway dns domain ntp_host timezone register_host bmc bmc_default_provider configure_networking configure_firewall)
   end
 
   def self.custom_labels
@@ -43,6 +44,7 @@ class ProvisioningWizard < BaseWizard
     self.help = "The installer can configure the networking and firewall rules on this machine with the configuration shown below. Default values are populated from this machine's existing networking configuration.\n\nIf you DO NOT want to configure networking, select the option 'Do not configure networking' from the list below."
     self.allow_cancellation = true
 
+    @register_host = false
     @bmc = false 
     @bmc_default_provider = 'ipmitool'
     @configure_networking = true
@@ -253,6 +255,26 @@ class ProvisioningWizard < BaseWizard
     @timezone ||= current_system_timezone
   end
 
+  def register_host=(answer)
+    @register_host = answer
+    if ['true', 'True', 'TRUE', true].include?(@register_host)
+      say "<%= color('Register this host with subscription manager to the customer portal for updates', :info) %>"
+      username = ask('Enter the USERNANE: ')
+      begin
+        password = ask('Enter the PASSWORD: ') { |q| q.echo = false }
+        passwrd2 = ask(' Re-enter PASSWORD: ') { |q| q.echo = false }
+      end while !password.eql?(passwrd2)
+      cmd = "subscription-manager register --username #{username} --password #{password} --auto-attach"
+      ret = system(cmd)
+      if ret.eql?(false)
+        say "<%= color('There was an error in registering this host!', :bad) %>"
+      else
+        say "<%= color('This host was successfully registered!', :good) %>"
+      end
+      @register_host = false
+    end
+  end
+
   def validate_interface
     'Interface must be specified' if @interface.nil? || @interface.empty?
   end
@@ -352,6 +374,12 @@ class ProvisioningWizard < BaseWizard
 
   def validate_timezone
     'Time zone is not a valid IANA time zone identifier' unless valid_timezone?(@timezone)
+  end
+
+  def validate_register_host
+    unless ['true', 'false', true, false].include?(@register_host)
+      'Invalid. Please enter true or false. (Register Host?)'
+    end
   end
 
   def validate_bmc
