@@ -8,7 +8,7 @@ class ProvisioningWizard < BaseWizard
         :ip => 'IP address',
         :fqdn => 'Hostname',
         :netmask => 'Network mask',
-        :network => 'DHCP Network address',
+        :network => 'DHCP network address',
         :own_gateway => 'Host gateway',
         :from => 'DHCP range start',
         :to => 'DHCP range end',
