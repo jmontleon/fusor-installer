@@ -258,24 +258,18 @@ class ProvisioningWizard < BaseWizard
   def register_host=(answer)
     @register_host = answer
     if ['true', 'True', 'TRUE', true].include?(@register_host)
-      say "<%= color('You may Configure your host for Updates via the RHSM', :good) %>"
-      say "<%= color('Please visit the following for more information', :good) %>"
-      say "<%= color('https://access.redhat.com/labs/registrationassistant/', :good) %>"
-      say "<%= color('You may also choose to do so now with your credentials.. continue?', :good) %>"
-      continue = ask('Enter YES to continue')
-      unless ['YES', 'yes', 'Yes', 'Y'].include?(continue)
-        @register_host = false
-        return
-      end
-      username = ask('enter the USERNANE')
-      password = ask('enter the PASSWORD')
+      say "<%= color('Register this host with subscription manager to the customer portal for updates', :info) %>"
+      username = ask('Enter the USERNANE: ')
+      begin
+        password = ask('Enter the PASSWORD: ') { |q| q.echo = false }
+        passwrd2 = ask(' Re-enter PASSWORD: ') { |q| q.echo = false }
+      end while !password.eql?(passwrd2)
       cmd = "subscription-manager register --username #{username} --password #{password} --auto-attach"
-      say "<%= color('cmd is : #{cmd}', :good) %>"
       ret = system(cmd)
       if ret.eql?(false)
-        say "<%= color('There was an error in registering the system!', :bad) %>"
+        say "<%= color('There was an error in registering this host!', :bad) %>"
       else
-        say "<%= color('System was successfully registered!', :good) %>"
+        say "<%= color('This host was successfully registered!', :good) %>"
       end
       @register_host = false
     end
