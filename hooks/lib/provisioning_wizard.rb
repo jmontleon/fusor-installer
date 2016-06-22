@@ -336,6 +336,8 @@ class ProvisioningWizard < BaseWizard
   def validate_gateway
     if !(valid_ip?(@gateway))
       'DHCP Gateway - Invalid IP address'
+    elsif IPAddr.new(ip)===IPAddr.new(gateway)
+      'DHCP Gateway conflicts with the IP address of the provisioning host'
     elsif (IPAddr.new(from)..IPAddr.new(to))===IPAddr.new(gateway)
       'DHCP range is Invalid - DHCP range includes the DHCP Gateway IP address'
     end
