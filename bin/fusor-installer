@@ -39,6 +39,9 @@ if [[ $@ == *"--devel_env"* ]]; then
   echo "Setting up file permission for development environment."
   setfacl -m u:vagrant:r /var/log/messages
   setfacl -m u:vagrant:rx /var/log/foreman-proxy
+else
+  echo "Setting up file permission for production environment."
+  setfacl -m u:foreman:r /var/log/messages
 fi
 
 if [[ $@ == *"--devel_env"* ]]; then
