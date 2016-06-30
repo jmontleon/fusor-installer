@@ -215,6 +215,13 @@ class fusor_network(
       action => 'accept',
       state  => 'NEW',
     } ->
+    # This is for accessing the Crane server on port 5000 with an OSE deployment
+    firewall { '5000 accept - crane server':
+      port   => '5000',
+      proto  => 'tcp',
+      action => 'accept',
+      state  => 'NEW',
+    } ->
     #Reject everything else
     firewall { '998 reject all':
       proto   => 'all',
