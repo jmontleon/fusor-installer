@@ -290,8 +290,12 @@ class ProvisioningWizard < BaseWizard
   def validate_netmask
     if netmask == nil
       'You must specify a netmask'
-    elsif not valid_ip?(@netmask)
+    elsif !(valid_ip?(@netmask))
       'Network mask is Invalid'
+    elsif !(valid_ip?(@ip))
+      # No need to repeat Invalid IP message here
+    elsif get_cidr(@ip, get_pfx(netmask)).netmask.to_s != netmask
+      'The netmask entered is not valid'
     elsif IPAddr.new(@netmask).to_i.to_s(2).count("1").to_i > 29
       'You require a /29 (255.255.255.248) subnet at minimum'
     end
