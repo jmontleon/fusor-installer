@@ -114,8 +114,6 @@ if app_value(:provisioning_wizard) != 'none'
     c['foreman']['repo'] = 'nightly'
   end
   c['foreman_proxy'] = {}
-  c['foreman_proxy']['bmc'] = provisioning_wizard.bmc
-  c['foreman_proxy']['bmc_default_provider'] = provisioning_wizard.bmc_default_provider
   c['foreman_proxy']['custom_repo'] = true
   c['foreman_proxy']['dhcp'] = true
   c['foreman_proxy']['dhcp_interface'] = provisioning_wizard.interface
