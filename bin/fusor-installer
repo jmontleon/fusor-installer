@@ -5,13 +5,13 @@ if [ "$(id -u)" != "0" ]; then
    exit 1
 fi
 
+h=\\-h\\b
 fusor-setup $@
-
 if [ $? != 0 ]; then
   echo "fusor-setup did not run properly."
   echo "Please correct the problem and try again."
   exit 2
-elif [[ $@ == *"--help"* ]]; then
+elif [[ $@ == *"--help"* ]] || [[ $@ =~ $h ]] || [[ $@ == *"--full-help"* ]]; then
   exit 0
 fi
 
