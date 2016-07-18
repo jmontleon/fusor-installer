@@ -17,8 +17,6 @@ class ProvisioningWizard < BaseWizard
         :domain => 'Domain',
         :ntp_host => 'NTP sync host',
         :timezone => 'Time zone',
-        :bmc => 'BMC feature enabled',
-        :bmc_default_provider => 'BMC default provider',
         :configure_networking => 'Configure networking on this machine',
         :configure_firewall => 'Configure firewall on this machine',
         :register_host => 'Register Host For Updates'
@@ -26,7 +24,7 @@ class ProvisioningWizard < BaseWizard
   end
 
   def self.order
-    %w(interface fqdn ip netmask own_gateway network from to gateway dns domain ntp_host timezone register_host bmc bmc_default_provider configure_networking configure_firewall)
+    %w(interface fqdn ip netmask own_gateway network from to gateway dns domain ntp_host timezone register_host configure_networking configure_firewall)
   end
 
   def self.custom_labels
@@ -45,8 +43,6 @@ class ProvisioningWizard < BaseWizard
     self.allow_cancellation = true
 
     @register_host = false
-    @bmc = false 
-    @bmc_default_provider = 'ipmitool'
     @configure_networking = true
     @configure_firewall = true
   end
@@ -399,18 +395,6 @@ class ProvisioningWizard < BaseWizard
   def validate_register_host
     unless ['true', 'false', true, false].include?(@register_host)
       'Invalid. Please enter true or false. (Register Host?)'
-    end
-  end
-
-  def validate_bmc
-    unless ['true', 'false', true, false].include?(@bmc)
-      'BMC feature enabled is invalid. Please enter true or false.'
-    end
-  end
-
-  def validate_bmc_default_provider
-    unless ['ipmitool', 'freeipmi'].include?(@bmc_default_provider)
-      'BMC default provider is invalid. Please enter ipmitool or freeipmi.'
     end
   end
 
