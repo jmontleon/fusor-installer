@@ -38,6 +38,12 @@ Kafo::KafoConfigure.hooking.register_boot(:add_deployment_dir_option) do
     'PATH', "Alternate deployment directory for development install.\nHas no effect for a production install.', :default => '/home/vagrant"
 end
 
+Kafo::KafoConfigure.hooking.register_boot(:add_skip_hardware_check) do
+  app_option '--skip_validations',
+    'SKIP_VALIDATIONS', 'Skip fusor-installer hardware validations.', :default => false
+end
+
+
 # functions specific to foreman installer
 Kafo::KafoConfigure.app_option '--reset-foreman-db', :flag,
                                "Drop foreman database first? You will lose all data! Unfortunately we\n" +
