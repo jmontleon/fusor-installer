@@ -17,7 +17,7 @@ fusor_install() {
     check_ram 16 16
     # 200 gb disk space at '/' required, 250 gb recommended
     check_disk_space 200 250 "/"
-    # 200 gb disk space at '/' required, 250 gb recommended
+    # 200 gb disk space at '/var/lib/' required, 250 gb recommended
     check_disk_space 200 250 "/var/lib/"
   fi
 
