@@ -8,27 +8,25 @@ fusor_install() {
 
   interactive=true
 
-  # Check if --skip_validations option was supplied
-  if [[ $@ != *"--skip_validations"* ]]; then
+  h=\\-h\\b
+  if [[ $@ == *"--help"* ]] || [[ $@ =~ $h ]] || [[ $@ == *"--full-help"* ]]; then
+    fusor-setup $@
+    exit 0
+  elif [[ $@ != *"--skip_validations"* ]]; then
     echo
     # 2 cores required, 4 recommended
     check_cpu_cores 2 4
     # 16 gb ram required, 16 gb recommended
     check_ram 16 16
-    # 200 gb disk space at '/' required, 250 gb recommended
-    check_disk_space 200 250 "/"
     # 200 gb disk space at '/var/lib/' required, 250 gb recommended
     check_disk_space 200 250 "/var/lib/"
   fi
 
-  h=\\-h\\b
   fusor-setup $@
   if [ $? != 0 ]; then
     echo "fusor-setup did not run properly."
     echo "Please correct the problem and try again."
     exit 2
-  elif [[ $@ == *"--help"* ]] || [[ $@ =~ $h ]] || [[ $@ == *"--full-help"* ]]; then
-    exit 0
   fi
 
   #kafo nukes the file permissions whatever we make them.
@@ -132,7 +130,7 @@ check_cpu_cores() {
     if [[ ! $REPLY =~ ^[Yy]$ ]]; then
       echo && echo "To skip system validations, run fusor-installer with '--skip_validations'."
       echo Exiting...
-      echo && exit 1
+      echo && exit 6
     fi
   fi
 }
@@ -172,7 +170,7 @@ check_ram() {
     if [[ ! $REPLY =~ ^[Yy]$ ]]; then
       echo && echo "To skip system validations, run fusor-installer with '--skip_validations'."
       echo Exiting...
-      echo && exit 1
+      echo && exit 7
     fi
   fi
 }
@@ -205,7 +203,7 @@ check_disk_space() {
     if [[ ! $REPLY =~ ^[Yy]$ ]]; then
       echo && echo "To skip system validations, run fusor-installer with '--skip_validations'."
       echo Exiting...
-      echo && exit 1
+      echo && exit 8
     fi
   fi
 }
