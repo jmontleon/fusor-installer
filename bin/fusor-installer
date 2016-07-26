@@ -1,90 +1,226 @@
 #!/bin/bash
 
-if [ "$(id -u)" != "0" ]; then
-   echo "This script must be run as root"
-   exit 1
-fi
+fusor_install() {
+  if [ "$(id -u)" != "0" ]; then
+     echo "This script must be run as root"
+     exit 1
+  fi
 
-h=\\-h\\b
-fusor-setup $@
-if [ $? != 0 ]; then
-  echo "fusor-setup did not run properly."
-  echo "Please correct the problem and try again."
-  exit 2
-elif [[ $@ == *"--help"* ]] || [[ $@ =~ $h ]] || [[ $@ == *"--full-help"* ]]; then
-  exit 0
-fi
+  interactive=true
 
-#kafo nukes the file permissions whatever we make them.
-if [[ $@ != *"--devel_env"* ]]; then
-  chmod 660 /etc/fusor-installer/fusor-installer.answers.yaml
-  chown root:foreman /etc/fusor-installer/fusor-installer.answers.yaml
-fi
+  # Check if --skip_validations option was supplied
+  if [[ $@ != *"--skip_validations"* ]]; then
+    echo
+    # 2 cores required, 4 recommended
+    check_cpu_cores 2 4
+    # 16 gb ram required, 16 gb recommended
+    check_ram 16 16
+    # 200 gb disk space at '/' required, 250 gb recommended
+    check_disk_space 200 250 "/"
+    # 200 gb disk space at '/var/lib/' required, 250 gb recommended
+    check_disk_space 200 250 "/var/lib/"
+  fi
 
-echo "Finished running fusor-setup."
-echo "Now running foreman-installer."
+  h=\\-h\\b
+  fusor-setup $@
+  if [ $? != 0 ]; then
+    echo "fusor-setup did not run properly."
+    echo "Please correct the problem and try again."
+    exit 2
+  elif [[ $@ == *"--help"* ]] || [[ $@ =~ $h ]] || [[ $@ == *"--full-help"* ]]; then
+    exit 0
+  fi
 
-foreman-installer --scenario fusor
+  #kafo nukes the file permissions whatever we make them.
+  if [[ $@ != *"--devel_env"* ]]; then
+    chmod 660 /etc/fusor-installer/fusor-installer.answers.yaml
+    chown root:foreman /etc/fusor-installer/fusor-installer.answers.yaml
+  fi
 
-if [ $? != 0 ]; then
-  echo "foreman-installer did not run properly."
-  echo "Please correct the problem and try again."
-  exit 3
-fi
+  echo "Finished running fusor-setup."
+  echo "Now running foreman-installer."
 
-echo "Finished running foreman-installer."
-echo "Now running rake fusor:setup."
+  foreman-installer --scenario fusor
 
-if [[ $@ == *"--devel_env"* ]]; then
-  echo "Setting up file permission for development environment."
-  setfacl -m u:vagrant:r /var/log/messages
-  setfacl -m u:vagrant:rx /var/log/foreman-proxy
-else
-  echo "Setting up file permission for production environment."
-  setfacl -m u:foreman:r /var/log/messages
-fi
+  if [ $? != 0 ]; then
+    echo "foreman-installer did not run properly."
+    echo "Please correct the problem and try again."
+    exit 3
+  fi
 
-if [[ $@ == *"--devel_env"* ]]; then
-  while [[ $# > 0 ]]; do
-    i="$1"
-    case $i in
-      --deployment_dir=*)
-      deployment_dir="${i#*=}"
+  echo "Finished running foreman-installer."
+  echo "Now running rake fusor:setup."
+
+  if [[ $@ == *"--devel_env"* ]]; then
+    echo "Setting up file permission for development environment."
+    setfacl -m u:vagrant:r /var/log/messages
+    setfacl -m u:vagrant:rx /var/log/foreman-proxy
+  else
+    echo "Setting up file permission for production environment."
+    setfacl -m u:foreman:r /var/log/messages
+  fi
+
+  if [[ $@ == *"--devel_env"* ]]; then
+    while [[ $# > 0 ]]; do
+      i="$1"
+      case $i in
+        --deployment_dir=*)
+        deployment_dir="${i#*=}"
+        shift
+        ;;
+        --deployment_dir)
+        deployment_dir="$2"
+        shift
+        ;;
+        *)
+
+        ;;
+      esac
       shift
-      ;;
-      --deployment_dir)
-      deployment_dir="$2"
-      shift
-      ;;
-      *)
+    done
 
-      ;;
-    esac
-    shift
+    if [[ -z "$deployment_dir" ]]; then
+      deployment_dir=/home/vagrant
+    fi
+
+    su - vagrant -c /bin/bash --login -c "cd ${deployment_dir}/foreman && rvm use 2.2.4 >/dev/null 2>&1 && rake fusor:setup >/dev/null 2>&1"
+    if [ $? != 0 ]; then
+      echo "rake fusor:setup did not run successfully"
+      echo "Please run it manually to determine the problem."
+      exit 4
+    else
+      echo "Finished running rake fusor:setup."
+      echo "Installation Complete!"
+    fi
+  else
+    foreman-rake fusor:setup >/dev/null 2>&1
+    if [ $? != 0 ]; then
+      echo "foreman-rake fusor:setup did not run successfully"
+      echo "Please run it manually to determine the problem."
+      exit 5
+    else
+      echo "Finished running foreman-rake fusor:setup."
+      echo "Installation Complete!"
+    fi
+  fi
+}
+
+check_cpu_cores() {
+  # Check if machine has enough CPU cores
+  cores_required=$1
+  cores_recommended=$2
+
+  intro_message="Checking CPU cores..."
+  cores_found=$(nproc)
+
+  # condition: CPU core count recommendation met
+  if [ $cores_found -ge $cores_recommended ]; then
+    print_with_outcome "$intro_message" "$cores_found cores" true
+  # condition: CPU core count minimum requirement met
+  elif [ $cores_found -ge $cores_required ]; then
+    print_with_outcome "$intro_message" "$cores_found cores" true
+    echo $cores_required cores required, $cores_recommended recommended.
+  # condition: CPU core count insufficient
+  else
+    print_with_outcome "$intro_message" "$cores_found cores" false
+    echo $cores_required cores required, $cores_recommended recommended.
+    if [ "$interactive" == true ]; then
+      read -p "Proceed without meeting CPU core requirement? (y/n) " -r
+    else
+      REPLY="n"
+    fi
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+      echo && echo "To skip system validations, run fusor-installer with '--skip_validations'."
+      echo Exiting...
+      echo && exit 1
+    fi
+  fi
+}
+
+check_ram() {
+  # System memory check
+  gb_ram_required=$1    # required system memory in gigabytes
+  gb_ram_recommended=$2 # recommended system memory in gigabytes
+
+  let mb_ram_required=gb_ram_required*1024
+  let mb_ram_recommended=gb_ram_recommended*1024
+
+  intro_message="Checking RAM size..."
+
+  # dmidecode -t 17 gives a listing of installed RAM modules
+  mb_ram_found=0
+  for i in $( sudo dmidecode -t 17 | awk '/Size:/ {print $2}' ); do
+    let mb_ram_found=mb_ram_found+i
   done
 
-  if [[ -z "$deployment_dir" ]]; then
-    deployment_dir=/home/vagrant
-  fi
-
-  su - vagrant -c /bin/bash --login -c "cd ${deployment_dir}/foreman && rvm use 2.2.4 >/dev/null 2>&1 && rake fusor:setup >/dev/null 2>&1"
-  if [ $? != 0 ]; then
-    echo "rake fusor:setup did not run successfully"
-    echo "Please run it manually to determine the problem."
-    exit 4
+  # condition: RAM recommendation met
+  if [ $mb_ram_found -ge $mb_ram_recommended ]; then
+    print_with_outcome "$intro_message" "$mb_ram_found MB" true
+  # condition: RAM minimum requirement met
+  elif [ $mb_ram_found -ge $mb_ram_required ]; then
+    print_with_outcome "$intro_message" "$mb_ram_found MB" true
+    echo $mb_ram_required MB RAM required, $mb_ram_recommended MB recommended.
+  # condition: RAM insufficient
   else
-    echo "Finished running rake fusor:setup."
-    echo "Installation Complete!"
+    print_with_outcome "$intro_message" "$mb_ram_found MB" false
+    echo $mb_ram_required MB RAM required, $mb_ram_recommended MB recommended.
+    if [ "$interactive" == true ]; then
+      read -p "Proceed without meeting RAM requirement? (y/n) " -r
+    else
+      REPLY="n"
+    fi
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+      echo && echo "To skip system validations, run fusor-installer with '--skip_validations'."
+      echo Exiting...
+      echo && exit 1
+    fi
   fi
-else
-  foreman-rake fusor:setup >/dev/null 2>&1
-  if [ $? != 0 ]; then
-    echo "foreman-rake fusor:setup did not run successfully"
-    echo "Please run it manually to determine the problem."
-    exit 5
-  else
-    echo "Finished running foreman-rake fusor:setup."
-    echo "Installation Complete!"
-  fi
-fi
+}
 
+check_disk_space() {
+  # Verify disk space available at directory_to_check
+  disk_space_required=$1     # required disk space in gigabytes
+  disk_space_recommended=$2  # recommended disk space in gigabytes
+  directory_to_check=$3      # directory to check for disk space
+
+  intro_message="Checking '$directory_to_check'..."
+  root_size_gb=$(df -BG $3 | awk '/\// {print $2}' | egrep -o '[0-9]+')
+
+  # condition: Disk size recommendation met
+  if [ $root_size_gb -ge $disk_space_recommended ]; then
+    print_with_outcome "$intro_message" "$root_size_gb GB" true
+  # condition: Disk size minimum requirement met
+  elif [ $root_size_gb -ge $disk_space_required ]; then
+    print_with_outcome "$intro_message" "$root_size_gb GB" true
+    echo $disk_space_required GB disk space required, $disk_space_recommended GB recommended.
+  # condition: Disk size insufficient
+  else
+    print_with_outcome "$intro_message" "$root_size_gb GB" false
+    echo $disk_space_required GB disk space required, $disk_space_recommended GB recommended.
+    if [ "$interactive" == true ]; then
+      read -p "Proceed without meeting disk space requirement? (y/n) " -r
+    else
+      REPLY="n"
+    fi
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+      echo && echo "To skip system validations, run fusor-installer with '--skip_validations'."
+      echo Exiting...
+      echo && exit 1
+    fi
+  fi
+}
+
+print_with_outcome() {
+  # Print a status message with OK or FAILED
+  outcome_message=$1  # message to print
+  outcome_amount=$2   # amount of resource found
+  outcome_status=$3   # true = OK, false = FAILED
+
+  if [ "$outcome_status" = true ] ; then
+    printf "%-23s %-10s \e[32m%-5s\e[0m\n" "$outcome_message" "$outcome_amount" "[  OK  ]"
+  else
+    printf "%-23s %-10s \e[91m%-5s\e[0m\n" "$outcome_message" "$outcome_amount" "[FAILED]"
+  fi
+}
+
+fusor_install "$@"
