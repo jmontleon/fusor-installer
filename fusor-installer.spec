@@ -19,6 +19,8 @@ Source0:    %{name}-%{version}%{?dashalphatag}.tar.gz
 
 BuildArch:  noarch
 
+BuildRequires: asciidoc
+
 Requires:   katello
 Requires:   ntp
 Requires:   rubygem-kafo >= 0.6.4
@@ -39,6 +41,10 @@ the Fusor Foreman plugin
   sed -ri '1sX(/usr/bin/ruby|/usr/bin/env ruby)X%{scl_ruby}X' bin/fusor-setup
 %endif
 
+# convert manpages
+a2x -d manpage -f manpage fusor-installer.8.asciidoc
+a2x -d manpage -f manpage fusor-setup.8.asciidoc
+
 %install
 install -d -m0755 %{buildroot}%{_datadir}/fusor-installer
 cp -R hooks modules %{buildroot}%{_datadir}/fusor-installer
@@ -49,6 +55,10 @@ install -d -m0755 %{buildroot}%{_sysconfdir}/fusor-installer/
 cp config/fusor-scenario.template %{buildroot}%{_sysconfdir}/fusor-installer/fusor-scenario.template
 cp config/fusor-installer.yaml %{buildroot}%{_sysconfdir}/fusor-installer/fusor-installer.yaml
 cp config/fusor-installer.answers.yaml %{buildroot}%{_sysconfdir}/fusor-installer/fusor-installer.answers.yaml
+# manpages
+%{__mkdir_p} %{buildroot}%{_mandir}/man8
+cp -a fusor-installer.8 %{buildroot}/%{_mandir}/man8/
+cp -a fusor-setup.8 %{buildroot}/%{_mandir}/man8/
 
 %files
 %defattr(-,root,root,-)
@@ -62,6 +72,8 @@ cp config/fusor-installer.answers.yaml %{buildroot}%{_sysconfdir}/fusor-installe
 %config(noreplace) %attr(600, root, root) %{_sysconfdir}/fusor-installer/fusor-installer.answers.yaml
 %{_sbindir}/fusor-installer
 %{_sbindir}/fusor-setup
+%doc %{_mandir}/man8/fusor-installer.8*
+%doc %{_mandir}/man8/fusor-setup.8*
 
 %changelog
 * Thu Apr 09 2015 John Matthews <jwmatthews@gmail.com> 0.0.14-1

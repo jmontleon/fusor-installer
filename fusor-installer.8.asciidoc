@@ -1,0 +1,174 @@
+fusor-installer(8)
+==================
+
+NAME
+----
+fusor-installer - installation script for Fusor
+
+SYNOPSIS
+--------
+fusor-installer [OPTION]...
+
+DESCRIPTION
+-----------
+fusor-installer is the installer that configures and setups Fusor.
+
+OPTIONS
+-------
+--reset-foreman-db::
+Drop foreman database first? You will lose all data! Unfortunately we can't detect a failure at the moment so you should verify the success manually. e.g. dropping can fail when DB is currently in use. (default: false)
+
+--foreman-admin-password='PASSWD'::
+Configure the foreman admin password. (default: nil)
+
+--deployment_dir='PATH'::
+Alternate deployment directory for development install.  Has no effect for a
+production install. (default: '/home/vagrant')
+
+--devel_env::
+Prepare a Fusor Answer File for development instead of production. (default: false)
+
+--provisioning_wizard='MODE'::
+Use non-interactive to run in non-interactive mode (default: "interactive")
+
+--skip_validations='SKIP_VALIDATIONS'::
+Skip fusor-installer hardware validations.  (default: false)
+
+--[no-]colors::
+Use color output on STDOUT (default: true)
+
+--color-of-background='COLOR'::
+Your terminal background is :bright or :dark (default: :dark)
+
+-d, --dont-save-answers::
+Skip saving answers to '/etc/fusor-installer/fusor-installer.answers.yaml'? (default: false)
+
+--ignore-undocumented::
+Ignore inconsistent parameter documentation (default: false)
+
+-i, --interactive::
+Run in interactive mode
+
+--log-level='LEVEL'::
+Log level for log file output (default: "info")
+
+-n, --noop::
+Run puppet in noop mode? (default: false)
+
+-p, --profile::
+Run puppet in profile mode? (default: false)
+
+-s, --skip-checks-i-know-better::
+Skip all system checks (default: false)
+
+-v, --verbose::
+Display log on STDOUT instead of progressbar
+
+-l, --verbose-log-level='LEVEL'::
+Log level for verbose mode output (default: "info")
+
+-S, --scenario='SCENARIO'::
+Use installation scenario
+
+--disable-scenario='SCENARIO'::
+Disable installation scenario
+
+--enable-scenario='SCENARIO'::
+Enable installation scenario
+
+--list-scenarios::
+List available installation scenaraios
+
+--force::
+Force change of installation scenaraio
+
+--compare-scenarios::
+Show changes between last used scenario and the scenario specified with -S or --scenario argument
+
+--migrations-only::
+Apply migrations to a selected scenario and exit
+
+-h, --help::
+print help
+
+--full-help::
+print complete help
+
+--[no-]enable-fusor::
+Enable 'fusor' puppet module (default: true)
+
+
+--fusor-configure-firewall::
+Should local firewall be configured by installer? (default: true)
+
+--fusor-configure-networking::
+Should local networking be configured by installer? (default: true)
+
+--fusor-dns::
+DNS forwarder to use as secondary nameserver (default: nil)
+
+--fusor-domain::
+DNZ zone, used for DNS server configuration and during Foreman Domain seeding (default: nil)
+
+--fusor-foreman-admin-password::
+Admin Password for Foreman (default: nil)
+
+--fusor-fqdn::
+FQDN  of Foreman instance (default: nil)
+
+--fusor-from::
+DHCP range first address, used for DHCP configuration and during Foreman subnet seeding (default: nil)
+
+--fusor-gateway::
+What is the gateway for machines using managed DHCP (default: nil)
+
+--fusor-interface::
+Which interface should this class configure (default: nil)
+
+--fusor-ip::
+What IP address should be set (default: nil)
+
+--fusor-netmask::
+What netmask should be set (default: nil)
+
+--fusor-network::
+Network address used when seeding subnet in Foreman (default: nil)
+
+--fusor-ntp-host::
+NTP sync host (default: nil)
+
+--fusor-own-gateway::
+What is the gateway for this machine (default: nil)
+
+--fusor-root-password::
+Default root password for provisioned machines (default: "$1$76Fb2SquLw31blG8ce3Nc5UeALMbum+KCg8wT/eCcwelLiPwsfFP+yAwoeAD\nbzWw\n")
+
+--fusor-ssh-public-key::
+SSH public key installed on provisioned machines during provisioning (default: nil)
+
+--fusor-timezone::
+Timezone (IANA identifier) (default: nil)
+
+--fusor-to::
+DHCP range last address, used for DHCP configuration and during Foreman subned seeding (default: nil)
+
+
+AUTHORS
+--------
+...................................
+Brad Buckingham <bbuckingham@redhat.com>
+David Davis <daviddavis@redhat.com>
+David Gao <jinmaster923@gmail.com>
+Derek Whatley <dwhatley@redhat.com>
+Dylan Murray <dymurray@redhat.com>
+Fabian von Feilitzsch <fabian@fabianism.us>
+Jason Montleon <jmontleo@redhat.com>
+jesus m. rodriguez <jmrodri@gmail.com>
+John Kim <jkim@redhat.com>
+John Matthews <jwmatthews@gmail.com>
+Stephen Herr <sherr@redhat.com>
+...................................
+
+COPYRIGHT
+---------
+2016 Red Hat, Licensed under GPLv2

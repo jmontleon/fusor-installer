@@ -1,0 +1,18 @@
+fusor-setup(8)
+==============
+
+NAME
+----
+fusor-setup - configuration sub-program used by fusor-installer
+
+SYNOPSIS
+--------
+See 'fusor-installer(8)'
+
+DESCRIPTION
+-----------
+fusor-setup is a configuration sub-program used by fusor-installer
+
+COPYRIGHT
+---------
+2016 Red Hat, Licensed under GPLv2
