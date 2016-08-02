@@ -255,7 +255,7 @@ class ProvisioningWizard < BaseWizard
     @register_host = answer
     if ['true', 'True', 'TRUE', true].include?(@register_host)
       say "<%= color('Register this host with subscription manager to the customer portal for updates', :info) %>"
-      username = ask('Enter the USERNANE: ')
+      username = ask('Enter the USERNAME: ')
       begin
         password = ask('Enter the PASSWORD: ') { |q| q.echo = false }
         passwrd2 = ask(' Re-enter PASSWORD: ') { |q| q.echo = false }
