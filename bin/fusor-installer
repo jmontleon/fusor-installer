@@ -140,28 +140,28 @@ check_ram() {
   gb_ram_required=$1    # required system memory in gigabytes
   gb_ram_recommended=$2 # recommended system memory in gigabytes
 
-  let mb_ram_required=gb_ram_required*1024
-  let mb_ram_recommended=gb_ram_recommended*1024
-
   intro_message="Checking RAM size..."
 
-  # dmidecode -t 17 gives a listing of installed RAM modules
-  mb_ram_found=0
-  for i in $( sudo dmidecode -t 17 | awk '/Size:/ {print $2}' ); do
-    let mb_ram_found=mb_ram_found+i
-  done
+  # { free -m, dividing by 1000, rounding to zero decimal places } is the best
+  # method i've found so far for detecting installed GB of ram without using a
+  # more hardware dependent command such as dmidecode -t 17
+
+  # note: this method overestimates by ~1GB per 128GB of RAM
+
+  gb_ram_found=$(free -m | awk '{$2=$2/1000;} 1' | awk '/Mem/ {print $2}')
+  gb_ram_found_rounded=$(echo $gb_ram_found | xargs printf "%.0f\n")
 
   # condition: RAM recommendation met
-  if [ $mb_ram_found -ge $mb_ram_recommended ]; then
-    print_with_outcome "$intro_message" "$mb_ram_found MB" true
+  if [ $gb_ram_found_rounded -ge $gb_ram_recommended ]; then
+    print_with_outcome "$intro_message" "$gb_ram_found_rounded GB" true
   # condition: RAM minimum requirement met
-  elif [ $mb_ram_found -ge $mb_ram_required ]; then
-    print_with_outcome "$intro_message" "$mb_ram_found MB" true
-    echo $mb_ram_required MB RAM required, $mb_ram_recommended MB recommended.
+  elif [ $gb_ram_found_rounded -ge $gb_ram_required ]; then
+    print_with_outcome "$intro_message" "$gb_ram_found_rounded GB" true
+    echo $gb_ram_required GB RAM required, $gb_ram_recommended GB recommended.
   # condition: RAM insufficient
   else
-    print_with_outcome "$intro_message" "$mb_ram_found MB" false
-    echo $mb_ram_required MB RAM required, $mb_ram_recommended MB recommended.
+    print_with_outcome "$intro_message" "$gb_ram_found_rounded GB" false
+    echo $gb_ram_required GB RAM required, $gb_ram_recommended GB recommended.
     if [ "$interactive" == true ]; then
       read -p "Proceed without meeting RAM requirement? (y/n) " -r
     else
@@ -182,18 +182,18 @@ check_disk_space() {
   directory_to_check=$3      # directory to check for disk space
 
   intro_message="Checking '$directory_to_check'..."
-  root_size_gb=$(df -BG $3 | awk '/\// {print $2}' | egrep -o '[0-9]+')
+  dir_size_gb=$(df -BG $3 | awk '/\// {print $2}' | egrep -o '[0-9]+')
 
   # condition: Disk size recommendation met
-  if [ $root_size_gb -ge $disk_space_recommended ]; then
-    print_with_outcome "$intro_message" "$root_size_gb GB" true
+  if [ $dir_size_gb -ge $disk_space_recommended ]; then
+    print_with_outcome "$intro_message" "$dir_size_gb GB" true
   # condition: Disk size minimum requirement met
-  elif [ $root_size_gb -ge $disk_space_required ]; then
-    print_with_outcome "$intro_message" "$root_size_gb GB" true
+  elif [ $dir_size_gb -ge $disk_space_required ]; then
+    print_with_outcome "$intro_message" "$dir_size_gb GB" true
     echo $disk_space_required GB disk space required, $disk_space_recommended GB recommended.
   # condition: Disk size insufficient
   else
-    print_with_outcome "$intro_message" "$root_size_gb GB" false
+    print_with_outcome "$intro_message" "$dir_size_gb GB" false
     echo $disk_space_required GB disk space required, $disk_space_recommended GB recommended.
     if [ "$interactive" == true ]; then
       read -p "Proceed without meeting disk space requirement? (y/n) " -r
