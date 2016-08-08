@@ -254,20 +254,16 @@ class ProvisioningWizard < BaseWizard
   def register_host=(answer)
     @register_host = answer
     if ['true', 'True', 'TRUE', true].include?(@register_host)
+      @register_host = true
       say "<%= color('Register this host with subscription manager to the customer portal for updates', :info) %>"
-      username = ask('Enter the USERNAME: ')
+      @portal_username = ask('Enter the USERNAME: ')
       begin
         password = ask('Enter the PASSWORD: ') { |q| q.echo = false }
         passwrd2 = ask(' Re-enter PASSWORD: ') { |q| q.echo = false }
       end while !password.eql?(passwrd2)
-      cmd = "subscription-manager register --username #{username} --password #{password} --auto-attach"
-      ret = system(cmd)
-      if ret.eql?(false)
-        say "<%= color('There was an error in registering this host!', :bad) %>"
-      else
-        say "<%= color('This host was successfully registered!', :good) %>"
-      end
-      @register_host = false
+      @portal_password = password
+    else
+      @register_host = false # ensure it's a boolean
     end
   end
 
@@ -396,6 +392,14 @@ class ProvisioningWizard < BaseWizard
     unless ['true', 'false', true, false].include?(@register_host)
       'Invalid. Please enter true or false. (Register Host?)'
     end
+  end
+
+  def portal_username
+    return @portal_username
+  end
+
+  def portal_password
+    return @portal_password
   end
 
   private

@@ -45,6 +45,21 @@ if app_value(:provisioning_wizard) != 'none'
     end
   end
 
+  if provisioning_wizard.register_host
+    # register host
+    # network is up now let's register
+    say 'Register this host with subscription manager to the customer portal for updates'
+    cmd = "subscription-manager register --username #{provisioning_wizard.portal_username} --password #{provisioning_wizard.portal_password} --auto-attach"
+    system(cmd)
+    if $?.exitstatus > 0
+      say "<%= color('There was an error in registering this host!', :bad) %>"
+      kafo.class.exit($?.exitstatus)
+    else
+      say "<%= color('This host was successfully registered!', :good) %>"
+    end
+  end
+
+
   #If a new admin password was specified set it, otherwise use the old value (if one exists).
   if app_value(:foreman_admin_password)
     param('fusor', 'foreman_admin_password').value = app_value(:foreman_admin_password)
