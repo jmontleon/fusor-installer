@@ -114,8 +114,6 @@ class BaseWizard
         else
           label = self.class.custom_labels[attr.to_sym] || name_label.rjust(adjustment) + value_label
         end
-        label = "Do not " + label.downcase if send(attr).is_a?(TrueClass) && attr != "register_host"
-        label = label
         menu.choice(label) { attr.to_sym }
       end
       menu.choice(HighLine.color('Cancel installation', :cancel)) { @kafo.class.exit(100) } if self.allow_cancellation

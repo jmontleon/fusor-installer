@@ -17,8 +17,8 @@ class ProvisioningWizard < BaseWizard
         :domain => 'Domain',
         :ntp_host => 'NTP sync host',
         :timezone => 'Time zone',
-        :configure_networking => 'Configure networking on this machine',
-        :configure_firewall => 'Configure firewall on this machine',
+        :configure_networking => 'Configure networking',
+        :configure_firewall => 'Configure firewall',
         :register_host => 'Register Host For Updates'
     }
   end
@@ -28,10 +28,7 @@ class ProvisioningWizard < BaseWizard
   end
 
   def self.custom_labels
-    {
-        :configure_networking => 'Configure networking',
-        :configure_firewall => 'Configure firewall'
-    }
+    {}
   end
 
   attr_accessor *attrs.keys
@@ -251,9 +248,9 @@ class ProvisioningWizard < BaseWizard
     @timezone ||= current_system_timezone
   end
 
-  def register_host=(answer)
-    @register_host = answer
-    if ['true', 'True', 'TRUE', true].include?(@register_host)
+  def get_register_host
+    @register_host = !@register_host
+    if @register_host
       @register_host = true
       say "<%= color('Register this host with subscription manager to the customer portal for updates', :info) %>"
       @portal_username = ask('Enter the USERNAME: ')
@@ -386,12 +383,6 @@ class ProvisioningWizard < BaseWizard
 
   def validate_timezone
     'Time zone is not a valid IANA time zone identifier' unless valid_timezone?(@timezone)
-  end
-
-  def validate_register_host
-    unless ['true', 'false', true, false].include?(@register_host)
-      'Invalid. Please enter true or false. (Register Host?)'
-    end
   end
 
   def portal_username
