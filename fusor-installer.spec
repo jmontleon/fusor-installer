@@ -27,6 +27,7 @@ Requires:   rubygem-kafo >= 0.6.4
 Requires:   git
 Requires:   ovirt-puppet
 Requires:   rubygem-ruby-ip
+Requires:   iptables-services
 
 %description
 This is a Foreman-Installer plugin that allows you to install and configure
@@ -76,6 +77,9 @@ cp -a fusor-setup.8 %{buildroot}/%{_mandir}/man8/
 %doc %{_mandir}/man8/fusor-setup.8*
 
 %changelog
+* Tue Aug 09 2016 Derek Whatley <dwhatley@redhat.com> 0.0.15-1
+- add 'iptables-services' dependency
+
 * Thu Apr 09 2015 John Matthews <jwmatthews@gmail.com> 0.0.14-1
 - answers: add gutterball plugin (bbuckingham@redhat.com)
 
