@@ -1,3 +1,5 @@
+require 'ip'
+
 if app_value(:provisioning_wizard) != 'none'
   require File.join(KafoConfigure.root_dir, 'hooks', 'lib', 'base_wizard.rb')
   require File.join(KafoConfigure.root_dir, 'hooks', 'lib', 'provisioning_wizard.rb')
@@ -59,12 +61,14 @@ if app_value(:provisioning_wizard) != 'none'
     end
   end
 
+  mask = IPAddr.new(provisioning_wizard.netmask).to_i.to_s(2).count("1")
+  from = IP.new("#{provisioning_wizard.from}/#{mask}")
+  to = IP.new("#{provisioning_wizard.to}/#{mask}")
 
   #If a new admin password was specified set it, otherwise use the old value (if one exists).
   if app_value(:foreman_admin_password)
     param('fusor', 'foreman_admin_password').value = app_value(:foreman_admin_password)
   end
-
   param('fusor', 'configure_networking').value = provisioning_wizard.configure_networking
   param('fusor', 'configure_firewall').value = provisioning_wizard.configure_firewall
   param('fusor', 'interface').value = provisioning_wizard.interface
@@ -76,6 +80,10 @@ if app_value(:provisioning_wizard) != 'none'
   param('fusor', 'network').value = provisioning_wizard.network
   param('fusor', 'from').value = provisioning_wizard.from
   param('fusor', 'to').value = provisioning_wizard.to
+  param('fusor', 'lease_from').value = provisioning_wizard.from
+  param('fusor', 'lease_to').value = (from+((to-from).to_i/2)).to_addr
+  param('fusor', 'subnet_from').value = (from+((to-from).to_i/2)+1).to_addr
+  param('fusor', 'subnet_to').value = provisioning_wizard.to
   param('fusor', 'domain').value = provisioning_wizard.domain
   param('fusor', 'fqdn').value = provisioning_wizard.fqdn
   param('fusor', 'ntp_host').value = provisioning_wizard.ntp_host
@@ -134,7 +142,7 @@ if app_value(:provisioning_wizard) != 'none'
   c['foreman_proxy']['dhcp_interface'] = provisioning_wizard.interface
   c['foreman_proxy']['dhcp_gateway'] = provisioning_wizard.gateway
   c['foreman_proxy']['dhcp_nameservers'] = provisioning_wizard.ip
-  c['foreman_proxy']['dhcp_range'] = "#{provisioning_wizard.from} #{provisioning_wizard.to}"
+  c['foreman_proxy']['dhcp_range'] = "#{provisioning_wizard.from} #{(from+((to-from).to_i/2)).to_addr}"
   c['foreman_proxy']['dns'] = true
   c['foreman_proxy']['dns_forwarders'] = provisioning_wizard.dns
   c['foreman_proxy']['dns_interface'] = provisioning_wizard.interface

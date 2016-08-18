@@ -31,6 +31,14 @@
 # $to::                     DHCP range last address, used for DHCP configuration and
 #                           during Foreman subned seeding
 #
+# $lease_from::             First address used for Discovered Hosts
+#
+# $lease_to::               Last address used for Discovered Hosts
+#
+# $subnet_from::            First address used for Managed Hosts
+#
+# $subnet_to::              Last address used for Managed Hosts
+#
 # $domain::                 DNZ zone, used for DNS server configuration and during Foreman
 #                           Domain seeding
 #
@@ -60,6 +68,10 @@ class fusor(
     $network,
     $from,
     $to,
+    $lease_from,
+    $lease_to,
+    $subnet_from,
+    $subnet_to,
     $domain,
     $fqdn,
     $ntp_host,
