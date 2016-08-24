@@ -57,6 +57,21 @@ if app_value(:provisioning_wizard) != 'none'
       say "<%= color('There was an error in registering this host!', :bad) %>"
       kafo.class.exit($?.exitstatus)
     else
+      # we have a successful registeration, now let's configure the repos
+      # disable all the junk first, ignore the exit code. if we are not
+      # subscribed disable may return exit code 1 or if there are no repos at
+      # all.
+      system('subscription-manager repos --disable "*" > /dev/null')
+
+      # enable the required repos
+      system('subscription-manager repos --enable rhel-7-server-rpms --enable rhel-server-rhscl-7-rpms --enable rhel-7-server-satellite-6.2-rpms')
+      # returns 1 if not registered or not subscribed, returns 0 otherwise
+      if $?.exitstatus > 0
+        say "<%= color('There was an error in registering this host!', :bad) %>"
+        kafo.class.exit($?.exitstatus)
+      end
+
+      # things are good
       say "<%= color('This host was successfully registered!', :good) %>"
     end
   end
