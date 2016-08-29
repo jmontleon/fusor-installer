@@ -248,11 +248,28 @@ class ProvisioningWizard < BaseWizard
     @timezone ||= current_system_timezone
   end
 
+  def system_registered?
+    # returns true if consumer cert exists and resembles a certificate.
+    # unregistered systems should not have /etc/consumer/cert.pem
+    return system ('grep "BEGIN CERTIFICATE" /etc/pki/consumer/cert.pem &> /dev/null')
+  end
+
   def get_register_host
     @register_host = !@register_host
     if @register_host
       @register_host = true
       say "<%= color('Register this host with subscription manager to the customer portal for updates', :info) %>"
+
+      if system_registered?
+        reregister_response = ask('System is already registered to the customer portal. Re-register? [Y/n] ')
+        if ['n', 'N', 'no', 'NO', 'No'].include? reregister_response
+          @register_host = false
+          return
+        else
+          @register_host = true
+        end
+      end
+
       @portal_username = ask('Enter the USERNAME: ')
       begin
         password = ask('Enter the PASSWORD: ') { |q| q.echo = false }
@@ -330,7 +347,7 @@ class ProvisioningWizard < BaseWizard
     elsif !(valid_ip?(@to))
       'DHCP range end - Invalid IP address'
     elsif !(valid_ip?(@from))
-      # No need to repeat the Invalid IP message here 
+      # No need to repeat the Invalid IP message here
     elsif IPAddr.new(to).to_i < (IPAddr.new(from).to_i)+1
       'DHCP range end is Invalid - Minimum range of 2 needed from DHCP range start'
     end
