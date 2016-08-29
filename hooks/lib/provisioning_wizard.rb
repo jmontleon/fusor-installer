@@ -36,7 +36,7 @@ class ProvisioningWizard < BaseWizard
   def initialize(kafo)
     super
     self.header = 'Networking setup:'
-    self.help = "The installer can configure the networking and firewall rules on this machine with the configuration shown below. Default values are populated from this machine's existing networking configuration.\n\nIf you DO NOT want to configure networking, select the option 'Do not configure networking' from the list below."
+    self.help = "The installer can configure the networking and firewall rules on this machine with the configuration shown below. Default values are populated from this machine's existing networking configuration.\n\nIf you DO NOT want to configure networking, select 'Configure networking' and change the value to false."
     self.allow_cancellation = true
 
     @register_host = false
@@ -330,7 +330,7 @@ class ProvisioningWizard < BaseWizard
     elsif !(valid_ip?(@to))
       'DHCP range end - Invalid IP address'
     elsif !(valid_ip?(@from))
-      # No need to repeat the Invalid IP message here 
+      # No need to repeat the Invalid IP message here
     elsif IPAddr.new(to).to_i < (IPAddr.new(from).to_i)+1
       'DHCP range end is Invalid - Minimum range of 2 needed from DHCP range start'
     end
