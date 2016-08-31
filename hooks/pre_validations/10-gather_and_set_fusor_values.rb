@@ -30,11 +30,11 @@ if app_value(:provisioning_wizard) != 'none'
       kafo.class.exit(101)
     end
 
-    if !system("ntpdate -q #{provisioning_wizard.ntp_host} &> /dev/null")  
+    if !system("ntpdate -q #{provisioning_wizard.ntp_host} &> /dev/null")
       say HighLine.color("WARNING!! - NTP sync host \"#{provisioning_wizard.ntp_host}\" does not appear to be valid!", :bad)
       say HighLine.color('Do you want to continue anyway? [Yes/No]', :run)
       response = STDIN.gets
-      if (response.downcase.chomp == "yes") || (response.downcase.chomp == "y") 
+      if (response.downcase.chomp == "yes") || (response.downcase.chomp == "y")
         say "  ... continuing installation"
       else
         say "Exiting installation!"
@@ -51,7 +51,7 @@ if app_value(:provisioning_wizard) != 'none'
     # register host
     # network is up now let's register
     say 'Register this host with subscription manager to the customer portal for updates'
-    cmd = "subscription-manager register --username #{provisioning_wizard.portal_username} --password #{provisioning_wizard.portal_password} --auto-attach"
+    cmd = "subscription-manager register --force --username #{provisioning_wizard.portal_username} --password #{provisioning_wizard.portal_password} --auto-attach"
     system(cmd)
     if $?.exitstatus > 0
       say "<%= color('There was an error in registering this host!', :bad) %>"
