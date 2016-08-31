@@ -9,7 +9,7 @@ fusor_install() {
   interactive=true
 
   h=\\-h\\b
-  if [[ $@ == *"--help"* ]] || [[ $@ =~ $h ]] || [[ $@ == *"--full-help"* ]]; then
+  if [[ $@ == *"--help"* ]] || [[ $@ =~ $h ]] || [[ $@ == *"--full-help"* ]] || [[ $@ == *"--list-scenarios"* ]]; then
     fusor-setup $@
     exit 0
   elif [[ $@ != *"--skip_validations"* ]]; then
