@@ -45,8 +45,13 @@ class ProvisioningWizard < BaseWizard
   end
 
   def start
-    get_interface if @interface.nil? || !interfaces.has_key?(@interface)
-    super
+    begin
+      get_interface if @interface.nil? || !interfaces.has_key?(@interface)
+      super
+    rescue Exception => e
+      @kafo.logger.info ("Got interrupt, exiting installer.")
+      @kafo.class.exit(:invalid_values)
+    end
   end
 
   def get_configure_networking
