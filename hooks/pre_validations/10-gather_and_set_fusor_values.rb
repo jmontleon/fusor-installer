@@ -7,27 +7,29 @@ if app_value(:provisioning_wizard) != 'none'
   provisioning_wizard.start
 
   if provisioning_wizard.configure_networking || provisioning_wizard.configure_firewall
-    command = PuppetCommand.new(%Q(class {"fusor_network":
-      interface            => "#{provisioning_wizard.interface}",
-      ip                   => "#{provisioning_wizard.ip}",
-      netmask              => "#{provisioning_wizard.netmask}",
-      gateway              => "#{provisioning_wizard.own_gateway}",
-      dns                  => "#{provisioning_wizard.dns}",
-      configure_networking => #{provisioning_wizard.configure_networking},
-      configure_firewall   => #{provisioning_wizard.configure_firewall},
-    }))
-    command.append '2>&1'
-    command = command.command
+    if provisioning_wizard.configure_networking
+      command = PuppetCommand.new(%Q(class {"fusor_network":
+        interface            => "#{provisioning_wizard.interface}",
+        ip                   => "#{provisioning_wizard.ip}",
+        netmask              => "#{provisioning_wizard.netmask}",
+        gateway              => "#{provisioning_wizard.own_gateway}",
+        dns                  => "#{provisioning_wizard.dns}",
+        configure_networking => #{provisioning_wizard.configure_networking},
+        configure_firewall   => #{provisioning_wizard.configure_firewall},
+      }))
+      command.append '2>&1'
+      command = command.command
 
-    say 'Starting networking setup'
-    logger.debug "running command to set networking"
-    logger.debug `#{command}`
+      say 'Starting networking setup'
+      logger.debug "running command to set networking"
+      logger.debug `#{command}`
 
-    if $?.success?
-      say 'Networking setup has finished'
-    else
-      say "<%= color('Networking setup failed', :bad) %>"
-      kafo.class.exit(101)
+      if $?.success?
+        say 'Networking setup has finished'
+      else
+        say "<%= color('Networking setup failed', :bad) %>"
+        kafo.class.exit(101)
+      end
     end
 
     if !system("ntpdate -q #{provisioning_wizard.ntp_host} &> /dev/null")
