@@ -25,7 +25,7 @@ Requires:   katello
 Requires:   ntp
 Requires:   rubygem-kafo >= 0.6.4
 Requires:   git
-Requires:   ovirt-puppet
+Requires:   ansible-ovirt
 Requires:   rubygem-ruby-ip
 Requires:   iptables-services
 
