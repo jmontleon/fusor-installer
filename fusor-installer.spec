@@ -26,6 +26,7 @@ Requires:   ntp
 Requires:   rubygem-kafo >= 0.6.4
 Requires:   git
 Requires:   ansible-ovirt
+Requires:   ansible-ocp
 Requires:   rubygem-ruby-ip
 Requires:   iptables-services
 
