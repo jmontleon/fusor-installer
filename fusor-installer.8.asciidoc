@@ -34,6 +34,9 @@ Use non-interactive to run in non-interactive mode (default: "interactive")
 --skip_validations='SKIP_VALIDATIONS'::
 Skip fusor-installer hardware validations.  (default: false)
 
+--upgrade::
+Upgrade QCI to version 1.1 (default: false)
+
 --[no-]colors::
 Use color output on STDOUT (default: true)
 

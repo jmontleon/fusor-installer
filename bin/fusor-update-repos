@@ -1,0 +1,46 @@
+#!/usr/bin/env python
+import json
+import sys
+import argparse
+from subprocess import Popen, PIPE, STDOUT
+
+if __name__ == "__main__":
+  parser = argparse.ArgumentParser()
+  parser.add_argument('-u', '--username', help='Satellite WebUI Username', required=True)
+  parser.add_argument('-p', '--password', help='Satellite WebUI Password', required=True)
+  parser.add_argument('-o', '--organization', help='Organization (e.g. Default Organization)', default='Default Organization')
+  args = parser.parse_args()
+
+  username = args.username
+  password = args.password
+
+  if args.organization:
+    organization = args.organization
+
+  # get the list of repositories
+  cmd = "hammer -u %s -p %s --output='json' repository list --organization='%s'" % (username, password, organization)
+  ret = Popen(cmd, shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True)
+  stdout_data, stderr_data = ret.communicate()
+  if ret.returncode is not 0:
+    print '[ERROR] Failed to get the list of repositories for \"%s\"' % organization
+    print '   stdout_data : %s' % stdout_data
+    print '   stderr_data : %s' % stderr_data
+    sys.exit(1)
+  else:
+    repos = json.loads(stdout_data)
+
+  # enable lazy-sync for all yum repositories from above (i.e. set the download-policy to 'on_demand')
+  print "The following repositories will have their 'download-policy' set to 'on_demand'"
+  for repo in repos:
+    if repo['Content Type'] == 'yum':
+      print '... updating repository with ID:[%d] \"%s\"' % (repo['Id'], repo['Name'])
+      cmd = "hammer -u %s -p %s repository update --download-policy 'on_demand' --id=%d" % (username, password, repo['Id'])
+      ret = Popen(cmd, shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True)
+      stdout_data, stderr_data = ret.communicate()
+      if ret.returncode is not 0:
+        print '[ERROR] updating repository with ID:[%s] \"%s\"' % (repo['Id'], repo['Name'])
+        print '   stdout_data : %s' % stdout_data
+        print '   stderr_data : %s' % stderr_data
+        sys.exit(2)
+    else:
+      continue
