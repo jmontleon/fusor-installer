@@ -1,10 +1,10 @@
---- 
+---
   :name: "Fusor"
   :description: ""
   :enabled: true
   :log_dir: "/var/log/foreman-installer"
   :log_name: "foreman-installer.log"
-  :log_level: "INFO"
+  :log_level: "DEBUG"
   :no_prefix: false
   :mapping:
     :"foreman::plugin::fusor":
@@ -140,7 +140,7 @@
     - /usr/share/katello-installer-base/hooks
   :custom: {}
   :low_priority_modules: []
-  :verbose_log_level: info
+  :verbose_log_level: debug
   :parser_cache_path: "./config/parser_cache.json"
   :provisioning_wizard: interactive
   :order:

@@ -223,7 +223,6 @@ if app_value(:provisioning_wizard) != 'none'
 
   d=YAML::load(File.open('/etc/fusor-installer/fusor-scenario.template'))
   if app_value(:devel_env)
-    d[:log_level] = 'DEBUG'
     d[:hook_dirs] = []
     d[:order] = ['certs', 'katello_devel', 'foreman_proxy', 'capsule']
   end

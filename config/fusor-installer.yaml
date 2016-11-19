@@ -4,7 +4,7 @@
   :enabled: true
   :log_dir: /var/log/fusor-installer
   :log_name: fusor-installer.log
-  :log_level: info
+  :log_level: debug
   :no_prefix: false
   :mapping: {}
   :answer_file: /etc/fusor-installer/fusor-installer.answers.yaml
@@ -18,7 +18,7 @@
   :hook_dirs: []
   :custom: {}
   :low_priority_modules: []
-  :verbose_log_level: info
+  :verbose_log_level: debug
   :parser_cache_path: "./config/parser_cache.json"
   :password: H69G9HAWaY0xeIefmGfRHTuur8IVYVAfesZonHwZFSQ
   :provisioning_wizard: interactive
