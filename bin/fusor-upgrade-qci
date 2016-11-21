@@ -1,0 +1,52 @@
+#!/bin/bash
+
+FUSOR_LIBEXEC_DIR="/usr/libexec/fusor-installer"
+ORG="Default Organization"
+
+echo -e "############################################################\n"
+echo -e " This script will Upgrade your QCI to version 1.1\n"
+echo -e " The upgrade process may take a long time."
+echo -e " Consider using a utility such as 'screen'.\n"
+echo -e " Review the following before proceeding: "
+echo -e "  - Updated system (e.g. 'yum update')"
+echo -e "  - No running tasks in Satellite"
+echo -e "  - Back up Databases\n"
+echo -e "############################################################\n"
+
+read -p "Do you want to continue? [y/N] " -n 1 -r
+if [[ $REPLY =~ ^[Yy]$ ]]; then
+
+  echo -e "\n\nEnter the Satellite login credentials for the '${ORG}'\n"
+  read -r -p  "   Enter the Administrator Username : " USER
+  while true
+  do
+    read -s -p  "   Enter the Administrator Password   : " PASSWORD
+    echo
+    read -s -p  "   Confirm the Administrator Password : " PASSWORD2
+    echo
+    [ "${PASSWORD}" = "${PASSWORD2}" ] && break
+    echo "Please try again"
+  done
+  echo -e "\nBegin upgrading QCI to version 1.1... \n"
+
+  echo -e "\nRunning the 'satellite-installer --upgrade' command ...\n"
+  time satellite-installer --upgrade
+  if [ "$?" -ne "0" ]; then
+    echo -e "[ERROR] Running the 'satellite-installer --upgrade' command ...\n"
+    exit
+  fi
+
+  echo -e "\nSetting the default download policy to 'on_demand'\n"
+  hammer -u ${USER} -p ${PASSWORD} settings set --name default_download_policy --value on_demand
+  if [ "$?" -ne "0" ]; then
+    echo -e "\n[ERROR] Setting the default download policy to 'on_demand'\n"
+    exit
+  fi
+
+  echo -e "\nRunning the 'fusor-update-repos' command ...\n"
+  ${FUSOR_LIBEXEC_DIR}/fusor-update-repos -u ${USER} -p ${PASSWORD} -o "${ORG}"
+
+  echo -e "\nFinished upgrading QCI to version 1.1!\n"
+else
+  echo -e "\n\nUser ABORT! Not running the QCI upgrade script.. and exiting..\n"
+fi

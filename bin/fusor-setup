@@ -43,6 +43,10 @@ Kafo::KafoConfigure.hooking.register_boot(:add_skip_hardware_check) do
     'SKIP_VALIDATIONS', 'Skip fusor-installer hardware validations.', :default => false
 end
 
+Kafo::KafoConfigure.hooking.register_boot(:add_upgrade_option) do
+  app_option '--upgrade',
+    :flag, 'Upgrade QCI to next version', :default => false
+end
 
 # functions specific to foreman installer
 Kafo::KafoConfigure.app_option '--reset-foreman-db', :flag,

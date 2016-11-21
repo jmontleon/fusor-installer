@@ -27,6 +27,7 @@ Requires:   rubygem-kafo >= 0.6.4
 Requires:   git
 Requires:   rubygem-ruby-ip
 Requires:   iptables-services
+Requires:   python
 
 %description
 This is a Foreman-Installer plugin that allows you to install and configure
@@ -51,6 +52,9 @@ cp -R hooks modules %{buildroot}%{_datadir}/fusor-installer
 install -d -m0755 %{buildroot}%{_sbindir}
 cp bin/fusor-installer %{buildroot}%{_sbindir}/fusor-installer
 cp bin/fusor-setup %{buildroot}%{_sbindir}/fusor-setup
+%{__mkdir_p} %{buildroot}%{_libexecdir}/fusor-installer
+cp bin/fusor-update-repos %{buildroot}%{_libexecdir}/fusor-installer/fusor-update-repos
+cp bin/fusor-upgrade-qci %{buildroot}%{_libexecdir}/fusor-installer/fusor-upgrade-qci
 install -d -m0755 %{buildroot}%{_sysconfdir}/fusor-installer/
 cp config/fusor-scenario.template %{buildroot}%{_sysconfdir}/fusor-installer/fusor-scenario.template
 cp config/fusor-installer.yaml %{buildroot}%{_sysconfdir}/fusor-installer/fusor-installer.yaml
@@ -72,6 +76,8 @@ cp -a fusor-setup.8 %{buildroot}/%{_mandir}/man8/
 %config(noreplace) %attr(600, root, root) %{_sysconfdir}/fusor-installer/fusor-installer.answers.yaml
 %{_sbindir}/fusor-installer
 %{_sbindir}/fusor-setup
+%{_libexecdir}/fusor-installer/fusor-update-repos
+%{_libexecdir}/fusor-installer/fusor-upgrade-qci
 %doc %{_mandir}/man8/fusor-installer.8*
 %doc %{_mandir}/man8/fusor-setup.8*
 
