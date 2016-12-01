@@ -393,6 +393,7 @@ class ProvisioningWizard < BaseWizard
 
   def validate_domain
     'Domain must be specified' if @domain.nil? || @domain.empty?
+    'Domain does not appear to be valid' if @domain !~ /\A([a-z0-9]+(-[a-z0-9]+)*\.)?+([a-z0-9]+(-[a-z0-9]+)*)\Z/
   end
 
   def validate_ntp_host
