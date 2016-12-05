@@ -291,12 +291,16 @@ class ProvisioningWizard < BaseWizard
   end
 
   def validate_ip
+    octet1 = @ip.partition(".")[0].to_i unless @ip.nil?
+    reserved = [0, 127, 224, 225, 226, 227, 228, 229, 230, 231, 232, 233, 234, 235, 236, 237, 238, 239]
     if !(valid_ip?(@ip))
       'IP address is invalid'
     elsif !(valid_ip?(@to)) || !(valid_ip?(@from))
       # No need to repeat the Invalid IP message here
     elsif (IPAddr.new(from)..IPAddr.new(to))===IPAddr.new(ip)
       'DHCP range is Invalid - DHCP range includes the provisioning host IP address'
+    elsif reserved.include? octet1
+      "IP Address should not start with #{octet1}"
     end
   end
 
