@@ -396,8 +396,13 @@ class ProvisioningWizard < BaseWizard
   end
 
   def validate_domain
-    'Domain must be specified' if @domain.nil? || @domain.empty?
-    'Domain does not appear to be valid' if @domain !~ /\A([a-z0-9]+(-[a-z0-9]+)*\.)*+([a-z0-9]+(-[a-z0-9]+)*)\Z/
+    if @domain.nil? || @domain.empty?
+      'Domain must be specified'
+    elsif @domain !~ /\A([a-z0-9]+(-[a-z0-9]+)*\.)*+([a-z0-9]+(-[a-z0-9]+)*)\Z/
+      'Domain does not appear to be valid'
+    elsif @domain.length > 48
+      'Domain must be 48 characters or shorter'
+    end
   end
 
   def validate_ntp_host
