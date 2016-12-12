@@ -222,9 +222,10 @@ class ProvisioningWizard < BaseWizard
       end
 
       if resolvedaddress != @ip || "#{Facter.value :fqdn}" != "#{@fqdn}"
-        result = system("/usr/bin/hostname #{@fqdn} 2>&1 >/dev/null")
+        result = system("/usr/bin/hostname #{@fqdn} >/dev/null 2>&1")
         if $?.exitstatus > 0
-          say "<%= color('Warning: Could not set hostname: #{result}', :bad) %>"
+          say "<%= color('The hostname command failed to set the system hostname!', :bad) %>"
+          return
         end
 
         begin
@@ -236,11 +237,13 @@ class ProvisioningWizard < BaseWizard
           File.open('/etc/hosts', "w") { |file| file.write(hosts) }
         rescue => error
           say "<%= color('Warning: Could not write host entry to /etc/hosts: #{error}', :bad) %>"
+          return
         end
         begin
           File.write('/etc/hostname', "#{@fqdn}")
         rescue  => error
           say "<%= color('Warning: Could not write hostname to /etc/hostname: #{error}', :bad) %>"
+          return
         end
 
         Facter.flush
