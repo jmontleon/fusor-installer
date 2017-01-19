@@ -223,7 +223,7 @@ print_with_outcome() {
   fi
 }
 
-if [ $@ == "--upgrade" ]; then
+if [[ "$@" == "--upgrade" ]]; then
   ${FUSOR_LIBEXEC_DIR}/fusor-upgrade-qci
 else
   fusor_install "$@"
