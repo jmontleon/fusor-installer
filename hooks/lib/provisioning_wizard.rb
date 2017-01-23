@@ -19,7 +19,7 @@ class ProvisioningWizard < BaseWizard
         :timezone => 'Time zone',
         :configure_networking => 'Configure networking',
         :configure_firewall => 'Configure firewall',
-        :register_host => 'Register Host For Updates'
+        :register_host => 'Register host for updates'
     }
   end
 
