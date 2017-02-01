@@ -53,8 +53,6 @@
 # $root_password::          Default root password for provisioned machines
 #                           type:password
 #
-# $ssh_public_key::         SSH public key installed on provisioned machines during provisioning
-#
 # $foreman_admin_password:: Admin Password for Foreman
 class fusor(
     $configure_networking = true,
@@ -77,7 +75,6 @@ class fusor(
     $ntp_host,
     $timezone,
     $root_password,
-    $ssh_public_key,
     $foreman_admin_password
 ) {
   validate_bool($configure_networking)
